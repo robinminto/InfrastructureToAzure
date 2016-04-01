@@ -13,7 +13,8 @@ Configuration LinuxVMConfiguration {
 	nxFile SyncArchiveFromWeb
 	{
 	   Ensure = "Present"
-	   SourcePath = "https://github.com/marrobi/DevOpsDemos/raw/master/InfrastructureToAzure/Infrastructure/Websites/LinuxWebsite.zip"
+
+	   SourcePath = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/LinuxWebsite.zip"
 	   DestinationPath = "/var/tmp/LinuxWebsite.zip"
 	   Type = "File"
 	   DependsOn = "[nxPackage]httpd"

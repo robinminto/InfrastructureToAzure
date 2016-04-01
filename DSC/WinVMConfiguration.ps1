@@ -14,7 +14,8 @@ Configuration WinVMConfiguration
             Test-Path "C:\inetpub\Wwwroot\index.html"
         }
         SetScript ={
-            $source = "https://github.com/marrobi/DevOpsDemos/raw/master/InfrastructureToAzure/Infrastructure/Websites/WindowsWebsite.zip"
+			
+            $source = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/WindowsWebsite.zip"
   
            Invoke-WebRequest $source -OutFile "$env:TMP\website.zip"
         
