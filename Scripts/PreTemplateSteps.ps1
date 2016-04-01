@@ -43,7 +43,7 @@ $SASToken = New-AzureStorageContainerSASToken `
 
 
 # upload artifacts
-ls -File "$SolutionPath\Infrastructure\DSC\" -Recurse `
+ls -File "$SolutionPath\DSC\" -Recurse `
     | Azure.Storage\Set-AzureStorageBlobContent -Container  $DeploymentID.ToLower()   -Context $stor.Context -Force 
 
 
@@ -61,7 +61,7 @@ $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
 #import modules required by configurations
 [System.Collections.ArrayList]$jobs =  @()
 
-foreach($module in Get-ChildItem -Path "$solutionPath\Infrastructure\DSC\Modules" -Filter "*.zip"){
+foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
 
 
  $job =  New-AzureRmAutomationModule `
@@ -86,7 +86,7 @@ foreach($module in Get-ChildItem -Path "$solutionPath\Infrastructure\DSC\Modules
 # import configuration to be used by the VMs
 [System.Collections.ArrayList]$jobs =  @()
 
-foreach($config in Get-ChildItem -Path "$solutionPath\Infrastructure\DSC\" -Filter "*.ps1"){
+foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
     Import-AzureRmAutomationDscConfiguration  `
         -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
