@@ -14,5 +14,6 @@ Any questions, do let me me know.
 
 Marcus
 
-<https://twitter.com/techdiction>
-<http://www.techdiction.com>
+[Twitter](https://twitter.com/techdiction)
+
+[Blog](http://www.techdiction.com)
