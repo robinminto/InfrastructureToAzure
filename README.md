@@ -8,12 +8,11 @@ Resources refered to during the session included:
 * QuickStart Templates: <https://github.com/Azure/azure-quickstart-templates>
 * Visualise ARM Templates: <http://armviz.io>
 * PowerShell Gallery: <https://www.powershellgallery.com/packages>
-* VS Marketplace: <https://marketplace.visualstudio.com/vss/Build and release>
+* VS Marketplace: <https://marketplace.visualstudio.com/vss/Build%20and%20release>
 
 Any questions, do let me me know. 
 
 Marcus
 
 <https://twitter.com/techdiction>
-
 <http://www.techdiction.com>
