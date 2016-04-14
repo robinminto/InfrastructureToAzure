@@ -15,9 +15,6 @@
 
 
 
-# Remove resource group if it already exists - this takes time, consider creatng unique deployment ID each time
-Remove-AzureRmResourceGroup -Name $ResourceGroupName -ErrorAction SilentlyContinue -Force 
-
 
 # Create new Resource Group
 New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName   -Location $Region
