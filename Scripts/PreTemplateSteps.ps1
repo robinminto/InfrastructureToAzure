@@ -16,7 +16,7 @@
 
 
 # Remove resource group if it already exists - this takes time, consider creatng unique deployment ID each time
-Remove-AzureRmResourceGroup -Name "WinOps$DeploymentID" -ErrorAction SilentlyContinue -Force 
+Remove-AzureRmResourceGroup -Name $ResourceGroupName -ErrorAction SilentlyContinue -Force 
 
 
 # Create new Resource Group
@@ -51,7 +51,7 @@ ls -File "$SolutionPath\DSC\" -Recurse `
 $automationAccount = New-AzureRMAutomationAccount `
     –ResourceGroupName $ResourceGroupName `
     –Location $Region `
-    –Name "WinOpsAutomation$DeploymentID"
+    –Name "Automation$DeploymentID"
 
     
 # retrieve the automation account registration info
