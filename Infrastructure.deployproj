@@ -42,9 +42,11 @@
     <None Include="DSC\Modules\nx.zip" />
     <None Include="Scripts\PreTemplateSteps.ps1" />
     <None Include="Scripts\PostTemplateSteps.ps1" />
+    <None Include="Templates\empty.json" />
     <None Include="Templates\simplevm.json" />
     <None Include="Websites\LinuxWebsite.zip" />
     <None Include="Websites\WindowsWebsite.zip" />
+    <None Include="Websites\WindowsWebsite\index.html" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
   <ProjectExtensions>
