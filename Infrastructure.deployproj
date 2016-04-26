@@ -45,8 +45,13 @@
     <None Include="Templates\empty.json" />
     <None Include="Templates\simplevm.json" />
     <None Include="Websites\LinuxWebsite.zip" />
+    <None Include="Websites\LinuxWebsite\index.html" />
+    <None Include="Websites\LinuxWebsite\ninga.png" />
+    <None Include="Websites\LinuxWebsite\penguin.jpg" />
     <None Include="Websites\WindowsWebsite.zip" />
     <None Include="Websites\WindowsWebsite\index.html" />
+    <None Include="Websites\WindowsWebsite\ninga.png" />
+    <None Include="Websites\WindowsWebsite\penguin.jpg" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
   <ProjectExtensions>
