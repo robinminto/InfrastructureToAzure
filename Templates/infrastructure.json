@@ -386,7 +386,7 @@
             "settings": {
               "wmfVersion": "latest",
               "configurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
-              "Modulesurl": "[concat('https://artifacts',toLower(parameters('deploymentid')),'.blob.core.windows.net/',toLower(parameters('deploymentid')),'/UpdateLCMforAAPull.zip')]",
+              "Modulesurl": "[concat('https://arti',toLower(parameters('deploymentid')),'.blob.core.windows.net/artifacts/UpdateLCMforAAPull.zip')]",
               "SasToken": "[parameters('ArtifactsSASToken')]",
               "properties": {
                 "NodeConfigurationName": "[ concat('WinVMConfiguration','.localhost')]",
