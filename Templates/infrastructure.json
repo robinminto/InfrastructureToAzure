@@ -66,7 +66,7 @@
     "winvm1OSDiskName": "winvm1OSDisk",
     "winvm1VmSize": "Standard_D1",
     "winvm1NicName": "[concat(variables('winvm1Name'), 'NetworkInterface')]",
-    "publicIPAddressName": "[toLower(concat('winopsip',  parameters('deploymentid')))]",
+    "publicIPAddressName": "[toLower(concat('techugip',  parameters('deploymentid')))]",
     "winvmConfigurationFunction": "winvmConfiguration.ps1\\Main",
     "linuxvmConfigurationFunction": "linuxvmConfiguration.ps1\\Main",
     "testConfigurationFunction": "testConfiguration.ps1\\Main"
