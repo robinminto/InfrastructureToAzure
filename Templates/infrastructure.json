@@ -394,9 +394,10 @@
                   "UserName": "PLACEHOLDER_DONOTUSE",
                   "Password": "PrivateSettingsRef:registrationKeyPrivate"
                 },
+                "ConfigurationMode": "ApplyAndAutoCorrect",
                 "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
-                "Timestamp": "[parameters('timestamp')]"
-
+                "Timestamp": "[parameters('timestamp')]",
+                "RebootNodeIfNeeded": true
               }
             }
           }
@@ -476,9 +477,13 @@
               "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
               "RegistrationKey": "[parameters('AutomationRegistrationKey')]"
             },
+
             "settings": {
               "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",
-              "Mode": "Register"
+              "Mode": "Register",
+              "ConfigurationMode": "ApplyAndAutoCorrect",
+              "Timestamp": "[parameters('timestamp')]",
+              "RebootNodeIfNeeded":  true
             }
           }
         }
