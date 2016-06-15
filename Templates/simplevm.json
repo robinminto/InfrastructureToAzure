@@ -2,7 +2,7 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "winopsstorageType": {
+        "storageType": {
             "type": "string",
             "defaultValue": "Standard_LRS",
             "allowedValues": [
@@ -13,94 +13,94 @@
                 "Premium_LRS"
             ]
         },
-        "WinOpsVMName": {
+        "VMName": {
             "type": "string",
             "minLength": 1
         },
-        "WinOpsVMAdminUserName": {
+        "AdminUserName": {
             "type": "string",
             "minLength": 1
         },
-        "WinOpsVMAdminPassword": {
+        "AdminPassword": {
             "type": "securestring"
         },
-        "WinOpsVMWindowsOSVersion": {
+        "WindowsOSVersion": {
             "type": "string",
             "defaultValue": "2012-R2-Datacenter"
            
         }
     },
     "variables": {
-        "winopsstorageName": "[concat('winops', uniqueString(resourceGroup().id))]",
-        "WinOpsNetworkPrefix": "10.0.0.0/16",
-        "WinOpsNetworkSubnet1Name": "Subnet-1",
-        "WinOpsNetworkSubnet1Prefix": "10.0.0.0/24",
-        "WinOpsNetworkSubnet2Name": "Subnet-2",
-        "WinOpsNetworkSubnet2Prefix": "10.0.1.0/24",
-        "WinOpsVMImagePublisher": "MicrosoftWindowsServer",
-        "WinOpsVMImageOffer": "WindowsServer",
-        "WinOpsVMOSDiskName": "WinOpsVMOSDisk",
-        "WinOpsVMVmSize": "Standard_D1",
-        "WinOpsVMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'WinOpsNetwork')]",
-        "WinOpsVMSubnetRef": "[concat(variables('WinOpsVMVnetID'), '/subnets/', variables('WinOpsNetworkSubnet1Name'))]",
-        "WinOpsVMStorageAccountContainerName": "vhds",
-        "WinOpsVMNicName": "[concat(parameters('WinOpsVMName'), 'NetworkInterface')]"
+        "storageName": "[concat('', uniqueString(resourceGroup().id))]",
+        "NetworkPrefix": "10.0.0.0/16",
+        "NetworkSubnet1Name": "Subnet-1",
+        "NetworkSubnet1Prefix": "10.0.0.0/24",
+        "NetworkSubnet2Name": "Subnet-2",
+        "NetworkSubnet2Prefix": "10.0.1.0/24",
+        "VMImagePublisher": "MicrosoftWindowsServer",
+        "VMImageOffer": "WindowsServer",
+        "VMOSDiskName": "VMOSDisk",
+        "VMVmSize": "Standard_D1",
+        "VMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'Network')]",
+        "VMSubnetRef": "[concat(variables('VMVnetID'), '/subnets/', variables('NetworkSubnet1Name'))]",
+        "VMStorageAccountContainerName": "vhds",
+        "VMNicName": "[concat(parameters('VMName'), 'NetworkInterface')]"
     },
     "resources": [
         {
-            "name": "[variables('winopsstorageName')]",
+            "name": "[variables('storageName')]",
             "type": "Microsoft.Storage/storageAccounts",
             "location": "[resourceGroup().location]",
             "apiVersion": "2015-06-15",
             "dependsOn": [ ],
             "tags": {
-                "displayName": "winopsstorage"
+                "displayName": "storage"
             },
             "properties": {
-                "accountType": "[parameters('winopsstorageType')]"
+                "accountType": "[parameters('storageType')]"
             }
         },
         {
-            "name": "WinOpsNetwork",
+            "name": "Network",
             "type": "Microsoft.Network/virtualNetworks",
             "location": "[resourceGroup().location]",
             "apiVersion": "2015-06-15",
             "dependsOn": [ ],
             "tags": {
-                "displayName": "WinOpsNetwork"
+                "displayName": "Network"
             },
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
-                        "[variables('WinOpsNetworkPrefix')]"
+                        "[variables('NetworkPrefix')]"
                     ]
                 },
                 "subnets": [
                     {
-                        "name": "[variables('WinOpsNetworkSubnet1Name')]",
+                        "name": "[variables('NetworkSubnet1Name')]",
                         "properties": {
-                            "addressPrefix": "[variables('WinOpsNetworkSubnet1Prefix')]"
+                            "addressPrefix": "[variables('NetworkSubnet1Prefix')]"
                         }
                     },
                     {
-                        "name": "[variables('WinOpsNetworkSubnet2Name')]",
+                        "name": "[variables('NetworkSubnet2Name')]",
                         "properties": {
-                            "addressPrefix": "[variables('WinOpsNetworkSubnet2Prefix')]"
+                            "addressPrefix": "[variables('NetworkSubnet2Prefix')]"
                         }
                     }
                 ]
             }
         },
         {
-            "name": "[variables('WinOpsVMNicName')]",
+            "name": "[variables('VMNicName')]",
             "type": "Microsoft.Network/networkInterfaces",
             "location": "[resourceGroup().location]",
             "apiVersion": "2015-06-15",
             "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', 'WinOpsNetwork')]"
+                "[concat('Microsoft.Network/virtualNetworks/', 'Network')]"
             ],
             "tags": {
-                "displayName": "WinOpsVMNic"
+                "displayName": "VMNic"
             },
             "properties": {
                 "ipConfigurations": [
@@ -109,7 +109,7 @@
                         "properties": {
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[variables('WinOpsVMSubnetRef')]"
+                                "id": "[variables('VMSubnetRef')]"
                             }
                         }
                     }
@@ -117,37 +117,37 @@
             }
         },
         {
-            "name": "[parameters('WinOpsVMName')]",
+            "name": "[parameters('VMName')]",
             "type": "Microsoft.Compute/virtualMachines",
             "location": "[resourceGroup().location]",
             "apiVersion": "2015-06-15",
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('winopsstorageName'))]",
-                "[concat('Microsoft.Network/networkInterfaces/', variables('WinOpsVMNicName'))]"
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('VMNicName'))]"
             ],
             "tags": {
-                "displayName": "WinOpsVM"
+                "displayName": "VM"
             },
             "properties": {
                 "hardwareProfile": {
-                    "vmSize": "[variables('WinOpsVMVmSize')]"
+                    "vmSize": "[variables('VMVmSize')]"
                 },
                 "osProfile": {
-                    "computerName": "[parameters('WinOpsVMName')]",
-                    "adminUsername": "[parameters('WinOpsVMAdminUsername')]",
-                    "adminPassword": "[parameters('WinOpsVMAdminPassword')]"
+                    "computerName": "[parameters('VMName')]",
+                    "adminUsername": "[parameters('AdminUsername')]",
+                    "adminPassword": "[parameters('AdminPassword')]"
                 },
                 "storageProfile": {
                     "imageReference": {
-                        "publisher": "[variables('WinOpsVMImagePublisher')]",
-                        "offer": "[variables('WinOpsVMImageOffer')]",
-                        "sku": "[parameters('WinOpsVMWindowsOSVersion')]",
+                        "publisher": "[variables('VMImagePublisher')]",
+                        "offer": "[variables('VMImageOffer')]",
+                        "sku": "[parameters('WindowsOSVersion')]",
                         "version": "latest"
                     },
                     "osDisk": {
-                        "name": "WinOpsVMOSDisk",
+                        "name": "VMOSDisk",
                         "vhd": {
-                            "uri": "[concat('http://', variables('winopsstorageName'), '.blob.core.windows.net/', variables('WinOpsVMStorageAccountContainerName'), '/', variables('WinOpsVMOSDiskName'), '.vhd')]"
+                            "uri": "[concat('http://', variables('storageName'), '.blob.core.windows.net/', variables('VMStorageAccountContainerName'), '/', variables('VMOSDiskName'), '.vhd')]"
                         },
                         "caching": "ReadWrite",
                         "createOption": "FromImage"
@@ -156,7 +156,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('WinOpsVMNicName'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('VMNicName'))]"
                         }
                     ]
                 }

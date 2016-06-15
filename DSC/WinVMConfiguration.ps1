@@ -1,6 +1,5 @@
-Configuration WinVMConfiguration
-{
-
+Configuration WinVMConfiguration {
+ Node localhost {
    
     WindowsFeature WebServerRole
     {
@@ -15,15 +14,13 @@ Configuration WinVMConfiguration
         }
         SetScript ={
 			
-            $source = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/WindowsWebsite.zip"
-  
-           Invoke-WebRequest $source -OutFile "$env:TMP\website.zip"
-        
+           $source = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/WindowsWebsite.zip"
+           Invoke-WebRequest $source -OutFile "$env:TMP\website.zip"   
            Expand-Archive  -Path "$env:TMP\website.zip" -DestinationPath "c:\inetpub\wwwroot"
        }
 
-        GetScript = {@{Result = "InstallWebsite"}}
-        DependsOn = "[WindowsFeature]WebServerRole"
+       GetScript = {@{Result = "InstallWebsite"}}
+       DependsOn = "[WindowsFeature]WebServerRole"
     }
- 
+ }
 }
