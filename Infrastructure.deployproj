@@ -40,7 +40,6 @@
     </Content>
     <None Include="DSC\LinuxVMConfiguration.ps1" />
     <None Include="DSC\Modules\nx.zip" />
-    <Content Include="DSC\WebServerConfigConfiguration.ps1" />
     <None Include="Scripts\PreTemplateSteps.ps1" />
     <None Include="Scripts\PostTemplateSteps.ps1" />
     <None Include="Templates\empty.json" />
