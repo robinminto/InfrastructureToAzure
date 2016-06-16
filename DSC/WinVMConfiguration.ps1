@@ -1,6 +1,6 @@
 Configuration WinVMConfiguration {
  Node localhost {
-   
+  
     WindowsFeature WebServerRole
     {
       Name = "Web-Server"

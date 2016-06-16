@@ -16,7 +16,7 @@ Configuration LinuxVMConfiguration {
 
 	   SourcePath = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/LinuxWebsite.zip"
 	   DestinationPath = "/var/tmp/LinuxWebsite.zip"
-	   Type = "File"
+	   Type = "file"
 	   DependsOn = "[nxPackage]httpd"
 	}
 	nxArchive SyncWebDir
