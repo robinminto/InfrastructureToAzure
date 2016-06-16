@@ -388,15 +388,16 @@
               "configurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
               "Modulesurl": "[concat('https://arti',toLower(parameters('deploymentid')),'.blob.core.windows.net/artifacts/UpdateLCMforAAPull.zip')]",
               "SasToken": "[parameters('ArtifactsSASToken')]",
+              "advancedOptions": {
+                "forcePullAndApply": true
+              },
               "properties": {
                 "NodeConfigurationName": "[ concat('WinVMConfiguration','.localhost')]",
                 "RegistrationKey": {
                   "UserName": "PLACEHOLDER_DONOTUSE",
                   "Password": "PrivateSettingsRef:registrationKeyPrivate"
                 },
-                "advancedOptions": {
-                  "forcePullAndApply": true
-                },
+             
                 "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
                 "Timestamp": "[parameters('timestamp')]"
               }
