@@ -42,7 +42,7 @@
     "rebootNodeIfNeeded": true,
     "actionAfterReboot": "ContinueConfiguration",
     "allowModuleOverwrite": false,
-    "st1Name": "[concat('str',uniqueString(resourceGroup().id, deployment().name))]",
+    "st1Name": "[uniqueString(resourceGroup().id)]",
     "linuxvm1Name": "linuxvm1",
     "winvm1Name": "winvm1",
     "winvm1WindowsOSVersion": "2012-R2-Datacenter",
@@ -383,7 +383,7 @@
               "configuration": {
                 "function": "RegistrationMetaConfigV2",
                 "script": "RegistrationMetaConfigV2.ps1",
-                "url": "[concat('https://',variables('st1Name'),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip',parameters('ArtifactsSASToken'))]"
+                "url": "[concat('https://',variables('st1Name'),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip?start',parameters('ArtifactsSASToken'),'&end=end')]"
               },
               "advancedOptions": {
                 "forcePullAndApply": true
