@@ -375,32 +375,30 @@
 
             "publisher": "Microsoft.Powershell",
             "type": "DSC",
-            "typeHandlerVersion": "2.19",
+            "typeHandlerVersion": "2.20",
             "autoUpgradeMinorVersion": true,
-            "protectedSettings": {
-              "Items": {
-                "registrationKeyPrivate": "[parameters('AutomationRegistrationKey')]"
-              }
-            },
-
+           
             "settings": {
               "wmfVersion": "latest",
-              "configurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
-              "Modulesurl": "[concat('https://arti',toLower(parameters('deploymentid')),'.blob.core.windows.net/artifacts/UpdateLCMforAAPull.zip')]",
-              "SasToken": "[parameters('ArtifactsSASToken')]",
+              "configuration": {
+                "function": "RegistrationMetaConfigV2",
+                "script": "RegistrationMetaConfigV2.ps1",
+                "url": "[concat('https://arti',toLower(parameters('deploymentid')),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip')]"
+              },
               "advancedOptions": {
                 "forcePullAndApply": true
               },
-              "properties": {
-                "NodeConfigurationName": "[ concat('WinVMConfiguration','.localhost')]",
-                "RegistrationKey": {
-                  "UserName": "PLACEHOLDER_DONOTUSE",
-                  "Password": "PrivateSettingsRef:registrationKeyPrivate"
-                },
-             
-                "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
-                "Timestamp": "[parameters('timestamp')]"
-              }
+              "protectedSettings": {
+                "configurationArguments": {
+                  "NodeConfigurationName": "WinVMConfiguration.localhost'",
+                  "RegistrationKey": {
+                    "UserName": "PLACEHOLDER_DONOTUSE",
+                    "Password": "[parameters('AutomationRegistrationKey')]"
+                  }
+                }
+              },
+              "configurationUrlSasToken": "[parameters('ArtifactsSASToken')]",
+              "Timestamp": "[parameters('timestamp')]"
             }
           }
         }

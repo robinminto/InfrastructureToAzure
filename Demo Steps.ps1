@@ -92,7 +92,7 @@ Start-Process "https://www.powershellgallery.com/packages"
 $ResourceGroupName = "DevOpsConfigDemo" 
 $Region = "West Europe"
 # unique string to prevent duplicate storage account names
-$deploymentID = "ConfigDemo"
+$deploymentID = (-join ([char[]](65..90+97..122)*100 | Get-Random -Count 8)).ToLower()
 
 # Create new Resource Group
 New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName   -Location $Region
@@ -100,7 +100,7 @@ New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName   -Location $Regi
 # Create Storage Account for artifacts
 $stor = New-AzureRmStorageAccount `
        -ResourceGroupName $ResourceGroupName `
-       -Name "arti$($deploymentID.ToLower())" `
+       -Name $deploymentID `
        -Type Standard_LRS `
        -Location $Region
 
@@ -121,7 +121,7 @@ $SASToken = New-AzureStorageContainerSASToken `
 $automationAccount = New-AzureRMAutomationAccount `
     -ResourceGroupName $ResourceGroupName `
    -Location $Region `
-  -Name "DevOpsAutomation"
+  -Name "Automation$deploymentID"
 
 # retrieve the automation account registration info
 $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
@@ -183,7 +183,7 @@ $job = Start-AzureRmAutomationDscCompilationJob `
 
  # deploy template
 
-$cred = New-Object System.Management.Automation.PSCredential( "adminmarcus",(ConvertTo-SecureString "Password7" -AsPlainText -force))
+$cred = New-Object System.Management.Automation.PSCredential( "adminmarcus",(ConvertTo-SecureString "Password7Infra" -AsPlainText -force))
 
 $param = @{
       
