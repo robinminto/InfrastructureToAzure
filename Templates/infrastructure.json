@@ -10,7 +10,7 @@
     "AdminPassword": {
       "type": "securestring"
     },
-    "DeploymentID": {
+    "ArtifactsStorageAccountName": {
 
       "type": "string"
     },
@@ -27,7 +27,7 @@
 
       "type": "string"
     },
-      "timestamp": {
+    "timestamp": {
       "type": "string",
       "metadata": {
         "description": "The current datetime, as a string, to force the request to go through ARM even if all fields are the same as last ARM deployment of this template; example in parameters file is in MM/dd/yyyy H:mm:ss tt format"
@@ -66,7 +66,7 @@
     "winvm1OSDiskName": "winvm1OSDisk",
     "winvm1VmSize": "Standard_D1",
     "winvm1NicName": "[concat(variables('winvm1Name'), 'NetworkInterface')]",
-    "publicIPAddressName": "[toLower(concat('dotd',  parameters('deploymentid')))]",
+    "publicIPAddressName": "[uniqueString(resourceGroup().id)]",
     "winvmConfigurationFunction": "winvmConfiguration.ps1\\Main",
     "linuxvmConfigurationFunction": "linuxvmConfiguration.ps1\\Main",
     "testConfigurationFunction": "testConfiguration.ps1\\Main"
@@ -383,7 +383,7 @@
               "configuration": {
                 "function": "RegistrationMetaConfigV2",
                 "script": "RegistrationMetaConfigV2.ps1",
-                "url": "[concat('https://',variables('st1Name'),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip?start',parameters('ArtifactsSASToken'),'&end=end')]"
+                "url": "[concat('https://',parameters('ArtifactsStorageAccountName'),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip?start',parameters('ArtifactsSASToken'),'&end=end')]"
               },
               "advancedOptions": {
                 "forcePullAndApply": true

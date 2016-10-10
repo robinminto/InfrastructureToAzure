@@ -114,3 +114,4 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 Write-Host  "##vso[task.setvariable variable=AutomationRegistrationURL;]$($automationRegInfo.Endpoint)"
 Write-Host  "##vso[task.setvariable variable=AutomationRegistrationKey;]$($automationRegInfo.PrimaryKey)"
 Write-Host  "##vso[task.setvariable variable=SASToken;]$SASToken"
+Write-Host "##vso[task.setvariable variable=ArtifactsStorageAccountName;]$storageAccountName"
