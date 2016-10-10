@@ -22,10 +22,11 @@
 # Create new Resource Group
 New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName   -Location $Region
 
+$storageAccountName = (-join ([char[]](65..90+97..122)*100 | Get-Random -Count 8)).ToLower()
 # create new storage account
 $stor = New-AzureRmStorageAccount `
         -ResourceGroupName $ResourceGroupName `
-        -Name "arti$($DeploymentID.ToLower())" `
+        -Name $storageAccountName `
         -Type Standard_LRS `
         -Location $Region
 
