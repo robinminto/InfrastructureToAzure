@@ -383,7 +383,7 @@
               "configuration": {
                 "function": "RegistrationMetaConfigV2",
                 "script": "RegistrationMetaConfigV2.ps1",
-                "url": "[concat('https://',toLower(vatriables('st1Name')),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip')]"
+                "url": "[concat('https://',variables('st1Name'),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip')]"
               },
               "advancedOptions": {
                 "forcePullAndApply": true
@@ -481,9 +481,12 @@
             "settings": {
               "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",
               "Mode": "Register",
-               "Timestamp": "[parameters('timestamp')]"
-             }
+              "Timestamp": "[parameters('timestamp')]"
+            }
           }
+
+
+
         }
     
       ]
