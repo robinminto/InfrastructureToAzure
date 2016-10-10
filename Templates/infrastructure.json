@@ -42,7 +42,7 @@
     "rebootNodeIfNeeded": true,
     "actionAfterReboot": "ContinueConfiguration",
     "allowModuleOverwrite": false,
-    "st1Name": "[toLower(concat('stor',parameters('deploymentid')))]",
+    "st1Name": "[concat('str',uniqueString(resourceGroup().id, deployment().name))]",
     "linuxvm1Name": "linuxvm1",
     "winvm1Name": "winvm1",
     "winvm1WindowsOSVersion": "2012-R2-Datacenter",
