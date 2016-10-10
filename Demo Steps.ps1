@@ -119,9 +119,9 @@ $SASToken = New-AzureStorageContainerSASToken `
 
 # create automation account
 $automationAccount = New-AzureRMAutomationAccount `
-    �ResourceGroupName $ResourceGroupName `
-    �Location $Region `
-    �Name "DevOpsAutomation"
+    -ResourceGroupName $ResourceGroupName `
+   -Location $Region `
+  -Name "DevOpsAutomation"
 
 # retrieve the automation account registration info
 $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
@@ -160,14 +160,14 @@ foreach($config in Get-ChildItem -Path "$($solutionPath)DSC\" -Filter "*.ps1"){
 # import configuration to be used by the VMs
 
   Import-AzureRmAutomationDscConfiguration  `
-    -ResourceGroupName $ResourceGroupName  �AutomationAccountName $automationAccount.AutomationAccountName `
+    -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName `
     -SourcePath $config.FullName  `
-    -Published �Force
+    -Published -Force
 
    # Begin compilation of the configuration
 
 $job = Start-AzureRmAutomationDscCompilationJob `
-    -ResourceGroupName $ResourceGroupName  �AutomationAccountName $automationAccount.AutomationAccountName `
+    -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName `
     -ConfigurationName $config.Name.Replace(".ps1","")
   $jobs.add($job)  
  }

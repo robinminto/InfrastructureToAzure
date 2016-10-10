@@ -54,7 +54,7 @@
     "vn1Subnet2Prefix": "10.0.1.0/24",
     "linuxvm1ImagePublisher": "Canonical",
     "linuxvm1ImageOffer": "UbuntuServer",
-    "linuxvm1UbuntuOSVersion": "15.10",
+    "linuxvm1UbuntuOSVersion": "16.04",
     "linuxvm1OSDiskName": "linuxvm1OSDisk",
     "linuxvm1VmSize": "Standard_D1",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'vn1')]",
