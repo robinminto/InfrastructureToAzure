@@ -66,7 +66,7 @@
     "winvm1OSDiskName": "winvm1OSDisk",
     "winvm1VmSize": "Standard_D1",
     "winvm1NicName": "[concat(variables('winvm1Name'), 'NetworkInterface')]",
-    "publicIPAddressName": "[uniqueString(resourceGroup().id)]",
+    "publicIPAddressName": "[concat('infra2azure',uniqueString(resourceGroup().id))]",
     "winvmConfigurationFunction": "winvmConfiguration.ps1\\Main",
     "linuxvmConfigurationFunction": "linuxvmConfiguration.ps1\\Main",
     "testConfigurationFunction": "testConfiguration.ps1\\Main"
@@ -383,7 +383,7 @@
               "configuration": {
                 "function": "RegistrationMetaConfigV2",
                 "script": "RegistrationMetaConfigV2.ps1",
-                "url": "[concat('https://',parameters('ArtifactsStorageAccountName'),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip?start',parameters('ArtifactsSASToken'),'&end=end')]"
+                "url": "[concat('https://',parameters('ArtifactsStorageAccountName'),'.blob.core.windows.net/artifacts/RegistrationMetaConfigV2.zip',parameters('ArtifactsSASToken'))]"
               },
               "advancedOptions": {
                 "forcePullAndApply": true

@@ -189,7 +189,7 @@ $param = @{
       
     "AdminUsername"=$cred.UserName
     "AdminPassword"= $cred.Password
-    "DeploymentID"= $deploymentID
+    "ArtifactsStorageAccountName" = $stor.StorageAccountName
     "AutomationRegistrationURL" = $automationRegInfo.Endpoint
     "AutomationRegistrationKey" = $automationRegInfo.PrimaryKey
     "ArtifactsSASToken" = $SASToken.ToString()
@@ -200,7 +200,8 @@ $param = @{
 $depInfra = New-AzureRmResourceGroupDeployment `
     -TemplateFile "$($solutionPath)Templates\infrastructure.json"  `
     -ResourceGroupName $ResourceGroupName  `
-    -TemplateParameterObject $param
+    -TemplateParameterObject $param `
+    -Mode Complete -Force
 
 
  # Link linux config
