@@ -390,13 +390,15 @@
               },
               "protectedSettings": {
                 "configurationArguments": {
-                  "NodeConfigurationName": "WinVMConfiguration.localhost'",
+                  "NodeConfigurationName": "WinVMConfiguration.localhost",
                   "RegistrationKey": {
                     "UserName": "PLACEHOLDER_DONOTUSE",
                     "Password": "[parameters('AutomationRegistrationKey')]"
-                  }
+                  },
+                  "RegistrationUrl": "[parameters('AutomationRegistrationURL')]"
                 }
               },
+
               "configurationUrlSasToken": "[parameters('ArtifactsSASToken')]",
               "Timestamp": "[parameters('timestamp')]"
             }
