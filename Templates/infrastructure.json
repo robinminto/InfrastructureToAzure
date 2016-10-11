@@ -389,22 +389,24 @@
                 "forcePullAndApply": true
               },
               "configurationArguments": {
-                "RegistrationUrl": "[parameters('AutomationRegistrationURL')]"
 
               },
-              "protectedSettings": {
+
+
+              "configurationUrlSasToken": "[parameters('ArtifactsSASToken')]",
+              "Timestamp": "[parameters('timestamp')]"
+            } ,  
+            "protectedSettings": {
                 "configurationArguments": {
                   "NodeConfigurationName": "WinVMConfiguration.localhost",
                   "RegistrationKey": {
                     "UserName": "PLACEHOLDER_DONOTUSE",
                     "Password": "[parameters('AutomationRegistrationKey')]"
-                  }
-                      }
-              },
+                  },
+                    "RegistrationUrl": "[parameters('AutomationRegistrationURL')]"
 
-              "configurationUrlSasToken": "[parameters('ArtifactsSASToken')]",
-              "Timestamp": "[parameters('timestamp')]"
-            }
+                      }
+              }
           }
         }
       ]
