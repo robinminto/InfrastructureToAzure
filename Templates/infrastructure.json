@@ -377,7 +377,7 @@
             "type": "DSC",
             "typeHandlerVersion": "2.20",
             "autoUpgradeMinorVersion": true,
-           
+
             "settings": {
               "wmfVersion": "latest",
               "configuration": {
@@ -388,15 +388,18 @@
               "advancedOptions": {
                 "forcePullAndApply": true
               },
+              "configurationArguments": {
+                "RegistrationUrl": "[parameters('AutomationRegistrationURL')]"
+
+              },
               "protectedSettings": {
                 "configurationArguments": {
                   "NodeConfigurationName": "WinVMConfiguration.localhost",
                   "RegistrationKey": {
                     "UserName": "PLACEHOLDER_DONOTUSE",
                     "Password": "[parameters('AutomationRegistrationKey')]"
-                  },
-                  "RegistrationUrl": "[parameters('AutomationRegistrationURL')]"
-                }
+                  }
+                      }
               },
 
               "configurationUrlSasToken": "[parameters('ArtifactsSASToken')]",
