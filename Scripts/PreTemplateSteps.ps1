@@ -6,9 +6,7 @@
         [Parameter(Mandatory=$true)]
         $SolutionPath,
 
-        [Parameter(Mandatory=$true)]
-        $DeploymentID,
-
+     
         [Parameter(Mandatory=$true)]
         $Region
 )
@@ -52,7 +50,7 @@ ls -File "$SolutionPath\DSC\" -Recurse `
 $automationAccount = New-AzureRMAutomationAccount `
     –ResourceGroupName $ResourceGroupName `
     –Location $Region `
-    –Name "Automation$DeploymentID"
+    –Name "Automation$ResourceGroupName"
 
     
 # retrieve the automation account registration info
