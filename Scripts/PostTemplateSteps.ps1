@@ -3,8 +3,6 @@ Param
         [Parameter(Mandatory=$true)]
         $ResourceGroupName,
 
-        [Parameter(Mandatory=$true)]
-        $SolutionPath,
 
         [Parameter(Mandatory=$true)]
         $Region
