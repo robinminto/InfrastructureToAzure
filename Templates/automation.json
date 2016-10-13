@@ -44,7 +44,7 @@
   "outputs": {
     "artifactStorageName": {
       "type": "object",
-      "value": "[reference('artifactStorageName').Name]"
+      "value": "[reference(variables('artifactStorageName')).Name]"
     }
   }
 }
