@@ -57,13 +57,16 @@ $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
 [System.Collections.ArrayList]$jobs =  @()
 
 foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
-	Write-Host $module.Name
+
+Write-Host "Creating Module:"  $module.Name
+
  $job =  New-AzureRmAutomationModule `
     -Name $module.Name.Replace(".zip","") `
     -ResourceGroupName   $ResourceGroupName `
     -AutomationAccountName $automationAccount.AutomationAccountName `
     -ContentLink "$($stor.PrimaryEndpoints.Blob)modules/$($module.Name)$SASToken" 
     
+		Write-Host "$($stor.PrimaryEndpoints.Blob)modules/$($module.Name)$SASToken" 
 	
 	$jobs.add($job) 
 
