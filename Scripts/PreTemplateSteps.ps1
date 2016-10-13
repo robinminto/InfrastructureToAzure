@@ -81,9 +81,7 @@ Write-Host "Creating Module:"  $module.Name
 
  }
 
- Remove-AzureRmStorageAccount -Name $storageAccountName -ResourceGroupName $ResourceGroupName
-
-
+ 
 
 # import configuration to be used by the VMs
 [System.Collections.ArrayList]$jobs =  @()
