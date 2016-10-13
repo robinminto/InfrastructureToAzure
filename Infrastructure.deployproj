@@ -43,6 +43,7 @@
     <None Include="DSC\RegistrationMetaConfigV2.zip" />
     <None Include="Scripts\PreTemplateSteps.ps1" />
     <None Include="Scripts\PostTemplateSteps.ps1" />
+    <None Include="Templates\automation.json" />
     <None Include="Templates\empty.json" />
     <None Include="Templates\simplevm.json" />
     <None Include="Websites\LinuxWebsite.zip" />

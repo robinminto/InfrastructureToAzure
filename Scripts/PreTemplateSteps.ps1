@@ -3,9 +3,11 @@
         [Parameter(Mandatory=$true)]
         $ResourceGroupName,
 
+		[Parameter(Mandatory=$true)]
+        $ArtifactStorageName,
+
         [Parameter(Mandatory=$true)]
         $SolutionPath,
-
      
         [Parameter(Mandatory=$true)]
         $Region
@@ -18,16 +20,17 @@
 
 
 # Create new Resource Group
-New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName   -Location $Region
+#New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName   -Location $Region -ErrorAction SilentlyContinue
 
-$storageAccountName = (-join ([char[]](65..90+97..122)*100 | Get-Random -Count 8)).ToLower()
+#$storageAccountName = (-join ([char[]](65..90+97..122)*100 | Get-Random -Count 8)).ToLower()
 # create new storage account
-$stor = New-AzureRmStorageAccount `
-        -ResourceGroupName $ResourceGroupName `
-        -Name $storageAccountName `
-        -Type Standard_LRS `
-        -Location $Region
+#$stor = New-AzureRmStorageAccount `
+#        -ResourceGroupName $ResourceGroupName `
+#        -Name $storageAccountName `
+#        -Type Standard_LRS `
+#        -Location $Region
 
+$stor = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $ArtifactStorageName
 
 # Create new container
 Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context 
@@ -47,9 +50,8 @@ ls -File "$SolutionPath\DSC\" -Recurse `
 
 
 # create automation account
-$automationAccount = New-AzureRMAutomationAccount `
+$automationAccount = Get-AzureRMAutomationAccount `
     –ResourceGroupName $ResourceGroupName `
-    –Location $Region `
     –Name "Automation$ResourceGroupName"
 
     
