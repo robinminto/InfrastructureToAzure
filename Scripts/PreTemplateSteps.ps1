@@ -16,6 +16,7 @@
 New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName   -Location $Region -ErrorAction SilentlyContinue
 
 $storageAccountName = (-join ([char[]](65..90+97..122)*100 | Get-Random -Count 8)).ToLower()
+
 # create new storage account
 $stor = New-AzureRmStorageAccount `
        -ResourceGroupName $ResourceGroupName `
@@ -23,7 +24,8 @@ $stor = New-AzureRmStorageAccount `
         -Type Standard_LRS `
        -Location $Region
 
-	   Write-Host "Endpoint:" +  $stor.PrimaryEndpoints.Blob.AbsoluteUri 
+Write-Host "Endpoint:"  $stor.PrimaryEndpoints
+
 # Create new container
 Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context 
 
