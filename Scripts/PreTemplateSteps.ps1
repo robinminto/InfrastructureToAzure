@@ -3,8 +3,6 @@
         [Parameter(Mandatory=$true)]
         $ResourceGroupName,
 
-		[Parameter(Mandatory=$true)]
-        $artifactStorageName,
 
         [Parameter(Mandatory=$true)]
         $SolutionPath,
