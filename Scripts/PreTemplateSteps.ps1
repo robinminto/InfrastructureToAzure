@@ -30,26 +30,26 @@
 #        -Type Standard_LRS `
 #        -Location $Region
 
-$stor = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $ArtifactStorageName
+#$stor = Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $ArtifactStorageName
 
 # Create new container
-Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context 
+#Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context 
 
 
 # Get SAS token for containr, valid for a  day
-$SASToken = New-AzureStorageContainerSASToken `
-    -Name "artifacts" `
-    -Permission r  `
-    -Context $stor.Context `
-    -ExpiryTime (Get-Date).AddDays(1)
+#$SASToken = New-AzureStorageContainerSASToken `
+ #   -Name "artifacts" `
+ #   -Permission r  `
+  #  -Context $stor.Context `
+ #   -ExpiryTime (Get-Date).AddDays(1)
 
 
 # upload artifacts
-ls -File "$SolutionPath\DSC\" -Recurse `
-    | Azure.Storage\Set-AzureStorageBlobContent -Container  "artifacts"   -Context $stor.Context -Force 
+#ls -File "$SolutionPath\DSC\" -Recurse `
+#    | Azure.Storage\Set-AzureStorageBlobContent -Container  "artifacts"   -Context $stor.Context -Force 
 
 
-# create automation account
+# get automation account
 $automationAccount = Get-AzureRMAutomationAccount `
     –ResourceGroupName $ResourceGroupName `
     –Name "Automation$ResourceGroupName"
@@ -60,28 +60,31 @@ $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
      -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
 
 #import modules required by configurations
-[System.Collections.ArrayList]$jobs =  @()
+#[System.Collections.ArrayList]$jobs =  @()
 
-foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
+#foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
 
 
- $job =  New-AzureRmAutomationModule `
-    -Name $module.Name.Replace(".zip","") `
-    -ResourceGroupName   $ResourceGroupName `
+# $job =  New-AzureRmAutomationModule `
+ #   -Name $module.Name.Replace(".zip","") `
+ #   -ResourceGroupName   $ResourceGroupName `
+ #   -AutomationAccountName $automationAccount.AutomationAccountName `
+ #   -ContentLink "$($stor.PrimaryEndpoints.Blob.AbsoluteUri)artifacts/Modules/$($module.Name)$SASToken"
+ #     $jobs.add($job) 
+
+ #}
+
+ Get-AzureRmAutomationJob   -ResourceGroupName   $ResourceGroupName `
     -AutomationAccountName $automationAccount.AutomationAccountName `
-    -ContentLink "$($stor.PrimaryEndpoints.Blob.AbsoluteUri)artifacts/Modules/$($module.Name)$SASToken"
-      $jobs.add($job) 
-
- }
 
  # wait for all modules to be provisioned
- foreach($job in $jobs){
+ foreach($module in $modules) {
 
-    while(($job | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
+    while($module.ProvisioningState  -ne "Succeeded"){
 		sleep 5
 	}
-
- }
+	}
+ #}
 
 
 # import configuration to be used by the VMs
