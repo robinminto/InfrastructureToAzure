@@ -24,7 +24,7 @@ $stor = New-AzureRmStorageAccount `
         -Type Standard_LRS `
        -Location $Region
 
-Write-Host "Endpoint:"  $stor.PrimaryEndpoints.Blob
+Write-Host "Endpoint:"  $stor.PrimaryEndpoints.Blob.AbsoluteUri
 
 # Create new container
 Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context 
@@ -58,13 +58,13 @@ $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
 [System.Collections.ArrayList]$jobs =  @()
 
 foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
-Write-Host "$($stor.PrimaryEndpoints.Blob.AbsoluteUri)artifacts/Modules/$($module.Name)$SASToken"
+Write-Host "$($stor.PrimaryEndpoints.Blob)artifacts/Modules/$($module.Name)$SASToken"
 
  $job =  New-AzureRmAutomationModule `
     -Name $module.Name.Replace(".zip","") `
     -ResourceGroupName   $ResourceGroupName `
     -AutomationAccountName $automationAccount.AutomationAccountName `
-    -ContentLink "$($stor.PrimaryEndpoints.Blob.AbsoluteUri)artifacts/Modules/$($module.Name)$SASToken"
+    -ContentLink "$($stor.PrimaryEndpoints.Blob)artifacts/Modules/$($module.Name)$SASToken"
     
 	
 	$jobs.add($job) 
