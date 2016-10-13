@@ -23,6 +23,7 @@ $stor = New-AzureRmStorageAccount `
         -Type Standard_LRS `
        -Location $Region
 
+	   Write-Host "Endpoint:" +  $stor.PrimaryEndpoints.Blob.AbsoluteUri 
 # Create new container
 Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context 
 
