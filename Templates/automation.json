@@ -43,8 +43,8 @@
   ],
   "outputs": {
     "artifactStorageName": {
-      "type": "object",
-      "value": "[reference(variables('artifactStorageName'))]"
+      "type": "string",
+      "value": "[variables('artifactStorageName')]"
     }
   }
 }
