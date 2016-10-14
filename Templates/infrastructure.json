@@ -29,14 +29,7 @@
     }
   },
   "variables": {
-    "configurationMode": "ApplyAndAutoCorrect",
-    "configurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
-    "configurationModeFrequencyMins": 15,
-    "refreshFrequencyMins": 30,
-    "rebootNodeIfNeeded": true,
-    "actionAfterReboot": "ContinueConfiguration",
-    "allowModuleOverwrite": false,
-    "st1Name": "[uniqueString(resourceGroup().id)]",
+     "st1Name": "[uniqueString(resourceGroup().id)]",
     "linuxvm1Name": "linuxvm1",
     "winvm1Name": "winvm1",
     "winvm1WindowsOSVersion": "2012-R2-Datacenter",
@@ -44,15 +37,12 @@
     "vn1Prefix": "10.0.0.0/16",
     "vn1Subnet1Name": "Subnet-1",
     "vn1Subnet1Prefix": "10.0.0.0/24",
-    "vn1Subnet2Name": "Subnet-2",
-    "vn1Subnet2Prefix": "10.0.1.0/24",
     "linuxvm1ImagePublisher": "Canonical",
     "linuxvm1ImageOffer": "UbuntuServer",
     "linuxvm1UbuntuOSVersion": "16.04.0-LTS",
     "linuxvm1OSDiskName": "linuxvm1OSDisk",
     "linuxvm1VmSize": "Standard_D1",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'vn1')]",
-    "SubnetRef": "[concat(variables('VnetID'), '/subnets/', variables('vn1Subnet1Name'))]",
     "StorageAccountContainerName": "vhds",
     "linuxvm1NicName": "[concat(variables('linuxvm1Name'), 'NetworkInterface')]",
     "winvm1ImagePublisher": "MicrosoftWindowsServer",
@@ -63,8 +53,7 @@
     "publicIPAddressName": "[concat('infra2azure',uniqueString(resourceGroup().id))]",
     "winvmConfigurationFunction": "winvmConfiguration.ps1\\Main",
     "linuxvmConfigurationFunction": "linuxvmConfiguration.ps1\\Main",
-    "testConfigurationFunction": "testConfiguration.ps1\\Main",
-   "nsgName":  "testNSG"
+    "nsgName":  "SubnetNSG"
   },
   "resources": [
 
@@ -277,15 +266,14 @@
           {
             "name": "[variables('vn1Subnet1Name')]",
             "properties": {
-              "addressPrefix": "[variables('vn1Subnet1Prefix')]"
-            }
-          },
-          {
-            "name": "[variables('vn1Subnet2Name')]",
-            "properties": {
-              "addressPrefix": "[variables('vn1Subnet2Prefix')]"
+              "addressPrefix": "[variables('vn1Subnet1Prefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              }
+
             }
           }
+           
         ]
       }
     },
@@ -308,7 +296,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('SubnetRef')]"
+                "id": "[concat(variables('VnetID'), '/subnets/', variables('vn1Subnet1Name'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -343,7 +331,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('SubnetRef')]"
+                "id": "[concat(variables('VnetID'), '/subnets/', variables('vn1Subnet1Name'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {

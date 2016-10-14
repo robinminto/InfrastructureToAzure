@@ -54,39 +54,28 @@ $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
      -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
 
 #import modules required by configurations
-[System.Collections.ArrayList]$jobs =  @()
+[System.Collections.ArrayList]$modulejobs =  @()
 
 foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
 
-Write-Host "Creating Module:"  $module.Name
-
- $job =  New-AzureRmAutomationModule `
-    -Name $module.Name.Replace(".zip","") `
-    -ResourceGroupName   $ResourceGroupName `
-    -AutomationAccountName $automationAccount.AutomationAccountName `
-    -ContentLink "$($stor.PrimaryEndpoints.Blob)modules/$($module.Name)$SASToken" 
-    
-		Write-Host "$($stor.PrimaryEndpoints.Blob)modules/$($module.Name)$SASToken" 
-	
-	$jobs.add($job) 
+	Write-Host "Creating Module:"  $module.Name
+   
+	$modulejobs.add((New-AzureRmAutomationModule `
+		 -Name $module.Name.Replace(".zip","") `
+		 -ResourceGroupName   $ResourceGroupName `
+		 -AutomationAccountName $automationAccount.AutomationAccountName `
+		 -ContentLink "$($stor.PrimaryEndpoints.Blob)modules/$($module.Name)$SASToken")) 
 
  }
 
- # wait for all modules to be provisioned
- foreach($job in $jobs){
-
-    while(($job | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
-		sleep 5
-	}
-
- }
 
  
 
 # import configuration to be used by the VMs
-[System.Collections.ArrayList]$jobs =  @()
+[System.Collections.ArrayList]$configjobs =  @()
 
 foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
+	Write-Host "Creating Configuration:"  $config.Name
 
     Import-AzureRmAutomationDscConfiguration  `
         -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
@@ -94,18 +83,29 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
         -Published –Force
 
    # Begin compilation of the configuration
-   $job = Start-AzureRmAutomationDscCompilationJob `
+   $configjob = 
+    $configjobs.add((Start-AzureRmAutomationDscCompilationJob `
         -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
-        -ConfigurationName $config.Name.Replace(".ps1","")
-    $jobs.add($job)  
+        -ConfigurationName $config.Name.Replace(".ps1","")))  
  }
- 
- # Wait until all configurations have compiled
- foreach($job in $jobs){
 
- while(($job | Get-AzureRmAutomationDscCompilationJob).Status -ne "Completed"){
-	sleep 5
+ 
+  # wait for all modules to be provisioned
+ foreach($modulejobs in $modulejobs){
+
+    while(($modulejobs | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
+		sleep 5
+	}
+
  }
+
+
+ # Wait until all configurations have compiled
+ foreach($configjobs in $configjobs){
+
+	 while(($configjobs | Get-AzureRmAutomationDscCompilationJob).Status -ne "Completed"){
+		sleep 5
+	 }
 
  }
 
