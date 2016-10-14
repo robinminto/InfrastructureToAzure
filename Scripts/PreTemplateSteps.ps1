@@ -83,7 +83,7 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
         -Published –Force
 
    # Begin compilation of the configuration
-   $configjob = 
+
     $configjobs.add((Start-AzureRmAutomationDscCompilationJob `
         -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
         -ConfigurationName $config.Name.Replace(".ps1","")))  
@@ -92,8 +92,9 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
  
   # wait for all modules to be provisioned
  foreach($module in $modulejobs){
-
-    while(($module | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
+ 	  while(($modulejobs | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
+	   Write-Host "Wating for '$($module.Name)', current state: $($modulejobs | Get-AzureRmAutomationModule).ProvisioningState)" 
+  
 		sleep 5
 	}
 
@@ -102,9 +103,10 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
  # Wait until all configurations have compiled
  foreach($config in $configjobs){
-
+  
 	 while(($config | Get-AzureRmAutomationDscCompilationJob).Status -ne "Completed"){
-		sleep 5
+	 Write-Host "Wating for '$($config.Name)', current state: $(($config | Get-AzureRmAutomationDscCompilationJob).Status)" 
+  	sleep 5
 	 }
 
  }
