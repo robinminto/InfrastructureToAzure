@@ -68,7 +68,15 @@ foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zi
 
  }
 
+ 
+  # wait for all modules to be provisioned
+ foreach($module in $modules){
+ 	  while((Get-AzureRmAutomationModule -Name $module.Name -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
+).ProvisioningState  -ne "Succeeded"){
+	  		sleep 5
+	}
 
+ }
  
 
 # import configuration to be used by the VMs
@@ -89,15 +97,6 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
         -ConfigurationName $config.Name.Replace(".ps1","") ))  
  }
 
- 
-  # wait for all modules to be provisioned
- foreach($module in $modules){
- 	  while((Get-AzureRmAutomationModule -Name $module.Name -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
-).ProvisioningState  -ne "Succeeded"){
-	  		sleep 5
-	}
-
- }
 
 
  # Wait until all configurations have compiled
