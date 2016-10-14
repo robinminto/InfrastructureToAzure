@@ -253,7 +253,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
       ],
       "tags": {
         "displayName": "vn1"
