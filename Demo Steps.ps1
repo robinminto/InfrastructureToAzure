@@ -91,101 +91,15 @@ Start-Process "https://www.powershellgallery.com/packages"
 
 $ResourceGroupName = "DevOpsDemo-ConfigDemo" 
 $Region = "West Europe"
-# unique string to prevent duplicate storage account names
-$deploymentID = (-join ([char[]](65..90+97..122)*100 | Get-Random -Count 8)).ToLower()
 
-# Create new Resource Group
-New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName   -Location $Region
+cd $solutionPath
 
-# Create Storage Account for artifacts
-$stor = New-AzureRmStorageAccount `
-       -ResourceGroupName $ResourceGroupName `
-       -Name $deploymentID `
-       -Type Standard_LRS `
-       -Location $Region
+# open to views
+psedit  .\Scripts\PreTemplateSteps.ps1
+
+.\Scripts\PreTemplateSteps.ps1 -ResourceGroupName $ResourceGroupName -SolutionPath $solutionPath -Region $Region 
 
 
-Azure.Storage\New-AzureStorageContainer -Container "modules" -Context $stor.Context
-
-ls -File "$($solutionPath)DSC\modules" -Recurse `
-    | Azure.Storage\Set-AzureStorageBlobContent -Container  "modules"   -Context $stor.Context -Force 
-
-# Get SAS token for container, valid for a  day
-$SASToken = New-AzureStorageContainerSASToken `
-    -Name "modules"`
-    -Permission r  `
-    -Context $stor.Context `
-    -ExpiryTime (Get-Date).AddDays(1)
-
-# create automation account
-$automationAccount = New-AzureRMAutomationAccount `
-    -ResourceGroupName $ResourceGroupName `
-   -Location $Region `
-  -Name "Automation$deploymentID"
-
-# retrieve the automation account registration info
-$automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
-     -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
-
-     #import modules required by configurations
-[System.Collections.ArrayList]$modules =  @()
-
-foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
-
-	Write-Host "Creating Module:"  $module.Name
-   
-	$modules.add((New-AzureRmAutomationModule `
-		 -Name $module.Name.Replace(".zip","") `
-		 -ResourceGroupName   $ResourceGroupName `
-		 -AutomationAccountName $automationAccount.AutomationAccountName `
-		 -ContentLink "$($stor.PrimaryEndpoints.Blob)modules/$($module.Name)$SASToken")) 
-
- }
-
-
- 
-
-# import configuration to be used by the VMs
-[System.Collections.ArrayList]$configjobs =  @()
-
-foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
-	Write-Host "Creating Configuration:"  $config.Name
-
-    Import-AzureRmAutomationDscConfiguration  `
-        -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
-        -SourcePath $config.FullName  `
-        -Published –Force
-
-   # Begin compilation of the configuration
-
-    $configjobs.add((Start-AzureRmAutomationDscCompilationJob `
-        -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
-        -ConfigurationName $config.Name.Replace(".ps1","") ))  
- }
-
- 
-  # wait for all modules to be provisioned
- foreach($module in $modules){
- 	  while((Get-AzureRmAutomationModule -Name $module.Name -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
-).ProvisioningState  -ne "Succeeded"){
-	  		sleep 5
-	}
-
- }
-
-
- # Wait until all configurations have compiled
- foreach($configjob in $configjobs){
-  
-	 while((Get-AzureRmAutomationDscCompilationJob `
-            -ConfigurationName $configjob.ConfigurationName `
-            -AutomationAccountName $automationAccount.AutomationAccountName `
-            -ResourceGroupName $ResourceGroupName ).Status -ne "Completed"){
-
-	        sleep 5
-	 }
-
- }
 
 
  # deploy template
@@ -212,8 +126,9 @@ $depInfra = New-AzureRmResourceGroupDeployment `
 
 
  # Link linux config
-$node = Get-AzureRmAutomationDscNode -AutomationAccountName $automationAccount.AutomationAccountName -Name "linuxvm1" -ResourceGroupName $ResourceGroupName
-Set-AzureRmAutomationDscNode -AutomationAccountName $automationAccount.AutomationAccountName -Id $node.Id -NodeConfigurationName "LinuxVMConfiguration.localhost" -ResourceGroupName $ResourceGroupName -Force
+.\Scripts\PostTemplateSteps.ps1 -ResourceGroupName $ResourceGroupName -SolutionPath $solutionPath -Region $Region 
+
+
 
 
 # open: create in in private session
@@ -234,6 +149,6 @@ Start-Process "https://marketplace.visualstudio.com/vss/Build and release?sortBy
 #region clean up
 
 
- ####   Get-AzureRmResourceGroup | Where-Object { $_.ResourceGroupName -like "WinOps*"} | Remove-AzureRmResourceGroup -force
+ ####   Get-AzureRmResourceGroup | Where-Object { $_.ResourceGroupName -like "DevOpsDemo-ConfigDemo*"} | Remove-AzureRmResourceGroup -force
 
 #endregion

@@ -252,7 +252,9 @@
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
-      "dependsOn": [ ],
+      "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+      ],
       "tags": {
         "displayName": "vn1"
       },
