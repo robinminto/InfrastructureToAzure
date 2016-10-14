@@ -91,9 +91,9 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
  
   # wait for all modules to be provisioned
- foreach($modulejobs in $modulejobs){
+ foreach($module in $modulejobs){
 
-    while(($modulejobs | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
+    while(($module | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
 		sleep 5
 	}
 
@@ -101,9 +101,9 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
 
  # Wait until all configurations have compiled
- foreach($configjobs in $configjobs){
+ foreach($config in $configjobs){
 
-	 while(($configjobs | Get-AzureRmAutomationDscCompilationJob).Status -ne "Completed"){
+	 while(($config | Get-AzureRmAutomationDscCompilationJob).Status -ne "Completed"){
 		sleep 5
 	 }
 
