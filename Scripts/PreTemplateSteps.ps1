@@ -53,14 +53,14 @@ $automationAccount = New-AzureRMAutomationAccount `
 $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
      -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
 
-#import modules required by configurations
-[System.Collections.ArrayList]$modulejobs =  @()
+     #import modules required by configurations
+[System.Collections.ArrayList]$modules =  @()
 
 foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
 
 	Write-Host "Creating Module:"  $module.Name
    
-	$modulejobs.add((New-AzureRmAutomationModule `
+	$modules.add((New-AzureRmAutomationModule `
 		 -Name $module.Name.Replace(".zip","") `
 		 -ResourceGroupName   $ResourceGroupName `
 		 -AutomationAccountName $automationAccount.AutomationAccountName `
@@ -86,27 +86,29 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
     $configjobs.add((Start-AzureRmAutomationDscCompilationJob `
         -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
-        -ConfigurationName $config.Name.Replace(".ps1","")))  
+        -ConfigurationName $config.Name.Replace(".ps1","") ))  
  }
 
  
   # wait for all modules to be provisioned
- foreach($module in $modulejobs){
- 	  while(($modulejobs | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
-	   Write-Host "Wating for '$($module.Name)', current state: $($modulejobs | Get-AzureRmAutomationModule).ProvisioningState)" 
-  
-		sleep 5
+ foreach($module in $modules){
+ 	  while((Get-AzureRmAutomationModule -Name $module.Name -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
+).ProvisioningState  -ne "Succeeded"){
+	  		sleep 5
 	}
 
  }
 
 
  # Wait until all configurations have compiled
- foreach($config in $configjobs){
+ foreach($configjob in $configjobs){
   
-	 while(($config | Get-AzureRmAutomationDscCompilationJob).Status -ne "Completed"){
-	 Write-Host "Wating for '$($config.Name)', current state: $(($config | Get-AzureRmAutomationDscCompilationJob).Status)" 
-  	sleep 5
+	 while((Get-AzureRmAutomationDscCompilationJob `
+            -ConfigurationName $configjob.ConfigurationName `
+            -AutomationAccountName $automationAccount.AutomationAccountName `
+            -ResourceGroupName $ResourceGroupName ).Status -ne "Completed"){
+
+	        sleep 5
 	 }
 
  }

@@ -89,7 +89,7 @@ Start-Process "https://www.powershellgallery.com/packages"
 
 # DO NOT RUN, already done.
 
-$ResourceGroupName = "DevOpsConfigDemo" 
+$ResourceGroupName = "DevOpsDemo-ConfigDemo" 
 $Region = "West Europe"
 # unique string to prevent duplicate storage account names
 $deploymentID = (-join ([char[]](65..90+97..122)*100 | Get-Random -Count 8)).ToLower()
@@ -105,14 +105,14 @@ $stor = New-AzureRmStorageAccount `
        -Location $Region
 
 
-Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context
+Azure.Storage\New-AzureStorageContainer -Container "modules" -Context $stor.Context
 
-ls -File "$($solutionPath)DSC\" -Recurse `
-    | Azure.Storage\Set-AzureStorageBlobContent -Container  "artifacts"   -Context $stor.Context -Force 
+ls -File "$($solutionPath)DSC\modules" -Recurse `
+    | Azure.Storage\Set-AzureStorageBlobContent -Container  "modules"   -Context $stor.Context -Force 
 
 # Get SAS token for container, valid for a  day
 $SASToken = New-AzureStorageContainerSASToken `
-    -Name "artifacts"`
+    -Name "modules"`
     -Permission r  `
     -Context $stor.Context `
     -ExpiryTime (Get-Date).AddDays(1)
@@ -127,59 +127,66 @@ $automationAccount = New-AzureRMAutomationAccount `
 $automationRegInfo = Get-AzureRmAutomationRegistrationInfo `
      -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
 
+     #import modules required by configurations
+[System.Collections.ArrayList]$modules =  @()
 
-#import modules required by configurations
+foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zip"){
 
-
-[System.Collections.ArrayList]$jobs =  @()
-
-foreach($module in Get-ChildItem -Path "$($solutionPath)DSC\Modules" -Filter "*.zip"){
-
-
- $job =  New-AzureRmAutomationModule `
-    -Name $module.Name.Replace(".zip","") `
-    -ResourceGroupName   $ResourceGroupName `
-    -AutomationAccountName $automationAccount.AutomationAccountName `
-    -ContentLink "$($stor.PrimaryEndpoints.Blob.AbsoluteUri)artifacts/Modules/$($module.Name)$SASToken"
-      $jobs.add($job) 
+	Write-Host "Creating Module:"  $module.Name
+   
+	$modules.add((New-AzureRmAutomationModule `
+		 -Name $module.Name.Replace(".zip","") `
+		 -ResourceGroupName   $ResourceGroupName `
+		 -AutomationAccountName $automationAccount.AutomationAccountName `
+		 -ContentLink "$($stor.PrimaryEndpoints.Blob)modules/$($module.Name)$SASToken")) 
 
  }
 
-# wait for all modules to be provisioned
- foreach($job in $jobs){
 
-    while(($job | Get-AzureRmAutomationModule).ProvisioningState  -ne "Succeeded"){
-		sleep 5
+ 
+
+# import configuration to be used by the VMs
+[System.Collections.ArrayList]$configjobs =  @()
+
+foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
+	Write-Host "Creating Configuration:"  $config.Name
+
+    Import-AzureRmAutomationDscConfiguration  `
+        -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
+        -SourcePath $config.FullName  `
+        -Published –Force
+
+   # Begin compilation of the configuration
+
+    $configjobs.add((Start-AzureRmAutomationDscCompilationJob `
+        -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
+        -ConfigurationName $config.Name.Replace(".ps1","") ))  
+ }
+
+ 
+  # wait for all modules to be provisioned
+ foreach($module in $modules){
+ 	  while((Get-AzureRmAutomationModule -Name $module.Name -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
+).ProvisioningState  -ne "Succeeded"){
+	  		sleep 5
 	}
 
  }
 
-[System.Collections.ArrayList]$jobs =  @()
 
-foreach($config in Get-ChildItem -Path "$($solutionPath)DSC\" -Filter "*.ps1"){
-# import configuration to be used by the VMs
+ # Wait until all configurations have compiled
+ foreach($configjob in $configjobs){
+  
+	 while((Get-AzureRmAutomationDscCompilationJob `
+            -ConfigurationName $configjob.ConfigurationName `
+            -AutomationAccountName $automationAccount.AutomationAccountName `
+            -ResourceGroupName $ResourceGroupName ).Status -ne "Completed"){
 
-  Import-AzureRmAutomationDscConfiguration  `
-    -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName `
-    -SourcePath $config.FullName  `
-    -Published -Force
-
-   # Begin compilation of the configuration
-
-$job = Start-AzureRmAutomationDscCompilationJob `
-    -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName `
-    -ConfigurationName $config.Name.Replace(".ps1","")
-  $jobs.add($job)  
- }
-
-  # Wait until all configurations have compiled
- foreach($job in $jobs){
-
- while(($job | Get-AzureRmAutomationDscCompilationJob).Status -ne "Completed"){
-	sleep 5
- }
+	        sleep 5
+	 }
 
  }
+
 
  # deploy template
 
