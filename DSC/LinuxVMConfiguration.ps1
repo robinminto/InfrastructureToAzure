@@ -10,20 +10,20 @@ Configuration LinuxVMConfiguration {
 		Ensure = "Present"
 		}
 
-	nxFile SyncArchiveFromWeb
-	{
-	   SourcePath = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/LinuxWebsite.zip"
-	   DestinationPath = "/var/tmp/LinuxWebsite.zip"
-	   Mode = "644"        
-    	Type = "file"
-	   DependsOn = "[nxPackage]httpd"
-	}
-	nxArchive SyncWebDir
-	{
-	   SourcePath = "/var/tmp/LinuxWebsite.zip"
-	   DestinationPath = "/var/www/html"
-	   Force = $true
-	   DependsOn = "[nxFile]SyncArchiveFromWeb"
-	}
+#/	nxFile SyncArchiveFromWeb
+#	{
+#	   SourcePath = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/LinuxWebsite.zip"
+#	   DestinationPath = "/var/tmp/LinuxWebsite.zip"
+#	   Mode = "644"        
+ #   	Type = "file"
+#	   DependsOn = "[nxPackage]httpd"
+#	}
+#	nxArchive SyncWebDir
+#	{
+#	   SourcePath = "/var/tmp/LinuxWebsite.zip"
+#	   DestinationPath = "/var/www/html"
+#	   Force = $true
+#	   DependsOn = "[nxFile]SyncArchiveFromWeb"
+#	}
 }
 
