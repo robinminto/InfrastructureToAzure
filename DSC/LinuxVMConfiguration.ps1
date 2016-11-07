@@ -12,11 +12,10 @@ Configuration LinuxVMConfiguration {
 
 	nxFile SyncArchiveFromWeb
 	{
-	   Ensure = "Present"
-
 	   SourcePath = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/LinuxWebsite.zip"
 	   DestinationPath = "/var/tmp/LinuxWebsite.zip"
-	   Type = "file"
+	   Mode = "644"        
+    	Type = "file"
 	   DependsOn = "[nxPackage]httpd"
 	}
 	nxArchive SyncWebDir
