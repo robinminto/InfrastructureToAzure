@@ -12,8 +12,14 @@ Configuration LinuxVMConfiguration {
 
 	nxFile SyncArchiveFromWeb
 	{
-	   SourcePath = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/LinuxWebsite.zip"
-	   DestinationPath = "/var/tmp/linuxwebsite.zip"
+	 
+	 SourcePath =  "/var/log/waagent.log"
+
+	 #  SourcePath = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/LinuxWebsite.zip"
+	 #  DestinationPath = "/var/tmp/linuxwebsite.zip"
+
+	 	 DestinationPath = "/var/tmp/waagent.log"
+
 #	   Mode = "644"        
    	Type = "file"
 #	   DependsOn = "[nxPackage]httpd"
