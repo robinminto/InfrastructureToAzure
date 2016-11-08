@@ -12,7 +12,7 @@ Select-AzureRmSubscription  -SubscriptionName "Demos"
 # Start start build server ready for later...
 Start-AzureRMVM -Name VSTSBuild -ResourceGroupName "DevOps-Demos" 
 
-Get-AzureRmResourceGroup | Where-Object { $_.Name -match "DevOpsDemo-Infra2Azure*" }  | Get-AzureRmVM | Start-AzureRMVM 
+Get-AzureRmResourceGroup | Where { $_.ResourceGroupName -match "DevOpsDemo-Infra2Azure*" }  | Get-AzureRmVM | Start-AzureRMVM 
 
 # Retrieve List of Images
 #(Get-AzureRmVMImagePublisher -Location "East US" | Get-AzureRmVMImageOffer | Get-AzureRmVMImageSku).Count # 10/3: 1008
