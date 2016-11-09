@@ -112,9 +112,30 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
  }
 
+# download mof file 
+
+ $mofFolderr= Get-AzureRmAutomationDscOnboardingMetaconfig -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName
+
+ $mof = $mofFolder.GetFiles()[0]
+
+# Create new container
+Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context 
 
 
+# Get SAS token for containr, valid for a  day
+$SASToken = New-AzureStorageContainerSASToken `
+    -Name "artifacts" `
+    -Permission r  `
+    -Context $stor.Context `
+    -ExpiryTime (Get-Date).AddDays(1)
+
+(Get-Content  $mof.FullName) | Foreach-Object { $_ -replace 'ApplyAndMonitor', 'ApplyAndAutoCorrect' } | Set-Content $mof.FullName
+
+# upload to storage
+$upload = Azure.Storage\Set-AzureStorageBlobContent -File $mof.FullName -Container  "modules"   -Context $stor.Context -Force 
+$MOFUri = $UpLoad.ICloudBlob.Uri.AbsoluteUri
+$MOFUri
 # save variables for VSTS use
 Write-Host  "##vso[task.setvariable variable=AutomationRegistrationURL;]$($automationRegInfo.Endpoint)"
 Write-Host  "##vso[task.setvariable variable=AutomationRegistrationKey;]$($automationRegInfo.PrimaryKey)"
-Write-Host  "##vso[task.setvariable variable=SASToken;]$SASToken"
+Write-Host  "##vso[task.setvariable variable=MOFUri;]$MOFUri$SASToken"

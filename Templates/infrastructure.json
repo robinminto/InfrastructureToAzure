@@ -21,6 +21,10 @@
 
     },
  
+  "MOFUri": {
+
+      "type": "string"
+  },
     "timestamp": {
       "type": "string",
       "metadata": {
@@ -90,6 +94,19 @@
               "destinationAddressPrefix": "*",
               "access": "Allow",
               "priority": 1010,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "SSH",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1030,
               "direction": "Inbound"
             }
           },
@@ -520,14 +537,16 @@
             "publisher": "Microsoft.OSTCExtensions",
             "type": "DSCForLinux",
             "typeHandlerVersion": "2.0",
+      /*
             "protectedSettings": {
               "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
               "RegistrationKey": "[parameters('AutomationRegistrationKey')]"
             },
-
+*/
             "settings": {
               "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",
               "Mode": "Register",
+              "FileUri": "[parameters('MOFUri')]",
               "Timestamp": "[parameters('timestamp')]"
             }
           }
