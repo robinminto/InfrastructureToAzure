@@ -114,7 +114,7 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
 # download mof file 
 
- $mofFolderr= Get-AzureRmAutomationDscOnboardingMetaconfig -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName -Force
+ $mofFolder = Get-AzureRmAutomationDscOnboardingMetaconfig -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName -Force
 
  $mof = $mofFolder.GetFiles()[0]
 
