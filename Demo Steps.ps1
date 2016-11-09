@@ -3,7 +3,7 @@
 #
 
 #region Prep
-$solutionPath = "C:\Users\marrobi\Source\Repos\InfrastructureToAzure\"
+$solutionPath = "C:\Repos\InfrastructureToAzure\"
 
 # Authenicate
 Login-AzureRmAccount -ServicePrincipal -Tenant  "72f988bf-86f1-41af-91ab-2d7cd011db47" -Credential (Get-Credential -Message "Password" -UserName "74824f88-020e-446b-ba3e-35f75f376987" )

@@ -114,7 +114,7 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
 # download mof file 
 
- $mofFolderr= Get-AzureRmAutomationDscOnboardingMetaconfig -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName
+ $mofFolderr= Get-AzureRmAutomationDscOnboardingMetaconfig -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName -Force
 
  $mof = $mofFolder.GetFiles()[0]
 
@@ -135,6 +135,7 @@ $SASToken = New-AzureStorageContainerSASToken `
 $upload = Azure.Storage\Set-AzureStorageBlobContent -File $mof.FullName -Container  "modules"   -Context $stor.Context -Force 
 $MOFUri = $UpLoad.ICloudBlob.Uri.AbsoluteUri
 $MOFUri
+
 # save variables for VSTS use
 Write-Host  "##vso[task.setvariable variable=AutomationRegistrationURL;]$($automationRegInfo.Endpoint)"
 Write-Host  "##vso[task.setvariable variable=AutomationRegistrationKey;]$($automationRegInfo.PrimaryKey)"
