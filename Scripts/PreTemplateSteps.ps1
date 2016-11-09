@@ -132,7 +132,7 @@ $SASToken = New-AzureStorageContainerSASToken `
 (Get-Content  $mof.FullName) | Foreach-Object { $_ -replace 'ApplyAndMonitor', 'ApplyAndAutoCorrect' } | Set-Content $mof.FullName
 
 # upload to storage
-$upload = Azure.Storage\Set-AzureStorageBlobContent -File $mof.FullName -Container  "modules"   -Context $stor.Context -Force 
+$upload = Azure.Storage\Set-AzureStorageBlobContent -File $mof.FullName -Container  "artifacts"   -Context $stor.Context -Force 
 $MOFUri = $UpLoad.ICloudBlob.Uri.AbsoluteUri
 $MOFUri
 
