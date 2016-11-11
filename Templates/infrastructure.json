@@ -537,12 +537,12 @@
             "publisher": "Microsoft.OSTCExtensions",
             "type": "DSCForLinux",
             "typeHandlerVersion": "2.0",
-      /*
+      
             "protectedSettings": {
               "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
               "RegistrationKey": "[parameters('AutomationRegistrationKey')]"
             },
-*/
+
             "settings": {
               "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",
               "Mode": "Register",
