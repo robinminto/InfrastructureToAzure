@@ -546,7 +546,7 @@
             "settings": {
               "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",
               "Mode": "Register",
-              "FileUri": "[parameters('MOFUri')]",
+            /*  "FileUri": "[parameters('MOFUri')]", */
               "Timestamp": "[parameters('timestamp')]"
             }
           }
