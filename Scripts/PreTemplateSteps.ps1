@@ -88,7 +88,7 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
     Import-AzureRmAutomationDscConfiguration  `
         -ResourceGroupName $ResourceGroupName  –AutomationAccountName $automationAccount.AutomationAccountName `
         -SourcePath $config.FullName  `
-        -Published –Force
+        -Published –Force -Verbose
 
    # Begin compilation of the configuration
 
@@ -114,12 +114,12 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
 # download mof file 
 
- $mofFolder = Get-AzureRmAutomationDscOnboardingMetaconfig -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName -Force
+ $mofFolder = Get-AzureRmAutomationDscOnboardingMetaconfig -ResourceGroupName $ResourceGroupName  -AutomationAccountName $automationAccount.AutomationAccountName -Force -Verbose
 
  $mof = $mofFolder.GetFiles()[0]
 
 # Create new container
-Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context 
+Azure.Storage\New-AzureStorageContainer -Container "artifacts" -Context $stor.Context -Verbose
 
 
 # Get SAS token for containr, valid for a  day
@@ -129,10 +129,10 @@ $SASToken = New-AzureStorageContainerSASToken `
     -Context $stor.Context `
     -ExpiryTime (Get-Date).AddDays(1)
 
-(Get-Content  $mof.FullName) | Foreach-Object { $_ -replace 'ApplyAndMonitor', 'ApplyAndAutoCorrect' } | Set-Content $mof.FullName
+(Get-Content  $mof.FullName) | Foreach-Object { $_ -replace 'ApplyAndMonitor', 'ApplyAndAutoCorrect' } | Set-Content $mof.FullName -Verbose
 
 # upload to storage
-$upload = Azure.Storage\Set-AzureStorageBlobContent -File $mof.FullName -Container  "artifacts"   -Context $stor.Context -Force 
+$upload = Azure.Storage\Set-AzureStorageBlobContent -File $mof.FullName -Container  "artifacts"   -Context $stor.Context -Force -Verbose
 $MOFUri = $UpLoad.ICloudBlob.Uri.AbsoluteUri
 $MOFUri
 
