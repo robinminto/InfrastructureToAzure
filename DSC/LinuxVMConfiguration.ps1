@@ -17,23 +17,16 @@ Configuration LinuxVMConfiguration {
 	 	SourcePath = "https://github.com/marrobi/InfrastructureToAzure/raw/master/Websites/LinuxWebsite.zip"
 	   	DestinationPath = "/var/tmp/LinuxWebsite.zip"
 		Type = "file"
-	# SourcePath =  "/var/log/waagent.log"
 
-
-	 	# DestinationPath = "/var/tmp/waagent.log"
-
-#	   Mode = "644"        
-   	
-#	   DependsOn = "[nxPackage]httpd"
 	}
 
 
-#	nxArchive SyncWebDir
-#	{
-#	   SourcePath = "/var/tmp/LinuxWebsite.zip"
-#	   DestinationPath = "/var/www/html"
-#	   Force = $true
-#	   DependsOn = "[nxFile]SyncArchiveFromWeb"
-#	}
+	nxArchive SyncWebDir
+	{
+	   SourcePath = "/var/tmp/LinuxWebsite.zip"
+	   DestinationPath = "/var/www/html"
+	   Force = $true
+	   DependsOn = "'[nxFile]SyncArchiveFromWeb','[nxPackage]httpd'"
+	}
 }
 
