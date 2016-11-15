@@ -545,7 +545,7 @@
             */
             "settings": {
         /*      "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",*/
-              "Mode": "Pull;",
+              "Mode": "Pull",
          "FileUri": "[parameters('MOFUri')]",
               "Timestamp": "[parameters('timestamp')]"
             }
