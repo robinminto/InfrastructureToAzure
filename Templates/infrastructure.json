@@ -538,14 +538,14 @@
             "type": "DSCForLinux",
             "typeHandlerVersion": "2.0",
       
-            "protectedSettings": {
+       /*     "protectedSettings": {
               "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
               "RegistrationKey": "[parameters('AutomationRegistrationKey')]"
             },
-
+            */
             "settings": {
-              "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",
-              "Mode": "Register",
+        /*      "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",*/
+              "Mode": "Pull;",
          "FileUri": "[parameters('MOFUri')]",
               "Timestamp": "[parameters('timestamp')]"
             }
