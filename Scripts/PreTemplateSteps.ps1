@@ -73,6 +73,7 @@ foreach($module in Get-ChildItem -Path "$solutionPath\DSC\Modules" -Filter "*.zi
  foreach($module in $modules){
  	  while((Get-AzureRmAutomationModule -Name $module.Name -AutomationAccountName $automationAccount.AutomationAccountName -ResourceGroupName $ResourceGroupName
 ).ProvisioningState  -ne "Succeeded"){
+     Write-Host "Waiting for $($module.Name ) to provision"
 	  		sleep 5
 	}
 
@@ -106,7 +107,7 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
             -ConfigurationName $configjob.ConfigurationName `
             -AutomationAccountName $automationAccount.AutomationAccountName `
             -ResourceGroupName $ResourceGroupName ).Status -ne "Completed"){
-
+            Write-Host "Waiting for $($configjob.ConfigurationName) to compile"
 	        sleep 5
 	 }
 

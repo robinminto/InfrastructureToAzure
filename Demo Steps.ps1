@@ -64,6 +64,7 @@ Start-Process "https://portal.azure.com/?feature.customportal=false#create/Micro
 # GitHub & visualise
 Start-Process "https://github.com/Azure/azure-quickstart-templates"
 
+Start-Process "https://www.armviz.io"
 
 # Start deployment
 $depInfra = New-AzureRmResourceGroupDeployment `

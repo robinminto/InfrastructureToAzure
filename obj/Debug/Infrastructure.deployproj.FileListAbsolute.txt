@@ -1,0 +1,3 @@
+C:\Repos\InfrastructureToAzure\bin\Debug\DSC\InstallDSC.sh
+C:\Repos\InfrastructureToAzure\bin\Debug\DSC\UpdateLCMforAAPull.zip
+C:\Repos\InfrastructureToAzure\bin\Debug\DSC\WinVMConfiguration.ps1
