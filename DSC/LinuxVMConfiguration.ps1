@@ -26,7 +26,7 @@ Configuration LinuxVMConfiguration {
 	   SourcePath = "/var/tmp/LinuxWebsite.zip"
 	   DestinationPath = "/var/www/html"
 	   Force = $true
-	   DependsOn = "'[nxFile]SyncArchiveFromWeb','[nxPackage]httpd'"
+	   DependsOn = '[nxFile]SyncArchiveFromWeb','[nxPackage]httpd'
 	}
 }
 
