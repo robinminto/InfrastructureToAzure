@@ -102,14 +102,20 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
 
  # Wait until all configurations have compiled
  foreach($configjob in $configjobs){
-  
-	 while((Get-AzureRmAutomationDscCompilationJob `
+     $jobStatus = ""
+	 do {
+         
+      $jobStatus = (Get-AzureRmAutomationDscCompilationJob `
             -ConfigurationName $configjob.ConfigurationName `
             -AutomationAccountName $automationAccount.AutomationAccountName `
-            -ResourceGroupName $ResourceGroupName ).Status -ne "Completed"){
-            Write-Host "Waiting for $($configjob.ConfigurationName) to compile"
+            -ResourceGroupName $ResourceGroupName ).Status 
+            
+            Write-Host "Waiting for $($configjob.ConfigurationName) to compile, status is  $jobStatus "
+
 	        sleep 5
-	 }
+	 } 
+     while ($jobStatus  -ne "Completed" )
+     
 
  }
 
