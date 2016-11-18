@@ -108,7 +108,7 @@ foreach($config in Get-ChildItem -Path "$solutionPath\DSC\" -Filter "*.ps1"){
       $jobStatus = (Get-AzureRmAutomationDscCompilationJob `
             -ConfigurationName $configjob.ConfigurationName `
             -AutomationAccountName $automationAccount.AutomationAccountName `
-            -ResourceGroupName $ResourceGroupName ).Status 
+            -ResourceGroupName $ResourceGroupName | Sort-Object StartTime )[0].Status 
             
             Write-Host "Waiting for $($configjob.ConfigurationName) to compile, status is  $jobStatus "
 
