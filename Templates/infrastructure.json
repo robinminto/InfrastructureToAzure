@@ -540,8 +540,7 @@
             "settings": {
               "FileUri": "[parameters('MOFUri')]",
               "Mode": "Pull",
-              "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",
-              "Timestamp": "[parameters('timestamp')]"
+               "Timestamp": "[parameters('timestamp')]"
             }
           }
 
