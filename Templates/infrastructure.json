@@ -37,7 +37,7 @@
     "linuxvm1Name": "linuxvm1",
     "winvm1Name": "winvm1",
     "winvm1WindowsOSVersion": "2012-R2-Datacenter",
-    "st1Type": "Standard_LRS",
+    "st1Type": "Standard_GRS",
     "vn1Prefix": "10.0.0.0/16",
     "vn1Subnet1Name": "Subnet-1",
     "vn1Subnet1Prefix": "10.0.0.0/24",

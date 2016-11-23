@@ -21,7 +21,7 @@ Start-Process powershell.exe  -Argument '-command "Login-AzureRmAccount -Service
 
 
 # open inPrivate Session and check LB
-Start-Process "http://techugipconfigdemo.westeurope.cloudapp.azure.com/"
+Start-Process "http://infra2azurewazwv7terl2w4.westeurope.cloudapp.azure.com.westeurope.cloudapp.azure.com/"
 
 #  Open  VS
 Start-Process "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv" -ArgumentList  "$($solutionPath)Infrastructure.sln"
@@ -37,7 +37,7 @@ Start-Process "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\d
 
 
 # Create new Resource Group
-$ResourceGroupName = "DevOpsDemo1" 
+$ResourceGroupName = "tmpDevOpsDemo" 
 $Region = "West Europe"
 New-AzureRmResourceGroup -ResourceGroupName $ResourceGroupName    -Location $Region 
 
@@ -47,10 +47,11 @@ $cred = Get-Credential -Message "Enter Password:" -UserName "adminmarcus"
 
 $param = @{
 
-   "WinOpsVMName"="vm1";
-    "WinOpsVMAdminUserName" = $cred.UserName
-    "WinOpsVMWindowsOSVersion" = "2016-Nano-Server-Technical-Preview"
-    "WinOpsVMAdminPassword" = $cred.Password
+   "VMName"="vm1";
+    "AdminUserName" = $cred.UserName
+    "WindowsOSVersion" = "2016-Datacenter"
+    "AdminPassword" = $cred.Password
+    "PIPDnsName" = "mrdemovm"
 }
 
 
@@ -64,7 +65,7 @@ Start-Process "https://portal.azure.com/?feature.customportal=false#create/Micro
 # GitHub & visualise
 Start-Process "https://github.com/Azure/azure-quickstart-templates"
 
-Start-Process "https://www.armviz.io"
+Start-Process "http://armviz.io"
 
 # Start deployment
 $depInfra = New-AzureRmResourceGroupDeployment `
@@ -78,14 +79,29 @@ $depInfra = New-AzureRmResourceGroupDeployment `
 
 #region  Configuration Management
 
-#  Open  Template in VS
-Start-Process "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv" -ArgumentList  "$($solutionPath)Templates\infrastructure.json"
-
 psedit  "$($solutionPath)DSC\WinVMconfiguration.ps1"
 psedit  "$($solutionPath)DSC\LinuxVMconfiguration.ps1"
 
 # view DSC resources in gallery
 Start-Process "https://www.powershellgallery.com/packages"
+
+# Demos on deployed VM
+
+psedit  "C:\Users\marrobi\OneDrive - Microsoft\Documents\Sessions\DevOps, IaC, CM\Choco Example.ps1"
+
+
+# show custom resources and more complex examples.
+
+Start-Process "https://msdn.microsoft.com/en-us/powershell/dsc/resources"
+
+
+Start-Process "https://portal.azure.com/?feature.customportal=false#create/Microsoft.Template"
+
+
+#  Open  Template in VS
+Start-Process "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv" -ArgumentList  "$($solutionPath)Templates\infrastructure.json"
+
+Start-Process "http://armviz.io"
 
 
 # DO NOT RUN, already done.
@@ -99,9 +115,6 @@ cd $solutionPath
 psedit  .\Scripts\PreTemplateSteps.ps1
 
 .\Scripts\PreTemplateSteps.ps1 -ResourceGroupName $ResourceGroupName -SolutionPath $solutionPath -Region $Region 
-
-
-
 
  # deploy template
 
@@ -118,7 +131,6 @@ $param = @{
     "timestamp" = (Get-Date).ToString()
 }
 
-
 $depInfra = New-AzureRmResourceGroupDeployment `
     -TemplateFile "$($solutionPath)Templates\infrastructure.json"  `
     -ResourceGroupName $ResourceGroupName  `
@@ -130,17 +142,23 @@ $depInfra = New-AzureRmResourceGroupDeployment `
 .\Scripts\PostTemplateSteps.ps1 -ResourceGroupName $ResourceGroupName -SolutionPath $solutionPath -Region $Region 
 
 
-
-
 # open: create in in private session
-Start-Process "http://techugipconfigdemo.westeurope.cloudapp.azure.com/"
+Start-Process "http://xxx.westeurope.cloudapp.azure.com/"
+
+
+# show custom resources and more complex examples.
+
+Start-Process "https://msdn.microsoft.com/en-us/powershell/dsc/resources"
+
+
+Start-Process "https://portal.azure.com/?feature.customportal=false#create/Microsoft.Template"
 
 #endregion
 
 #region ReleaseManagement
 
 
-Start-Process "https://marcusrobinson.visualstudio.com/DefaultCollection/InstrastructureToAzure/_apps/hub/ms.vss-releaseManagement-web.hub-explorer?definitionId=1&_a=environments-editor"
+Start-Process "https://marrobi.visualstudio.com/Infrastructure%20To%20Azure/_apps/hub/ms.vss-releaseManagement-web.hub-explorer?definitionId=1&_a=environments-editor"
 
 Start-Process "https://marketplace.visualstudio.com/vss/Build and release?sortBy=Downloads"
 
