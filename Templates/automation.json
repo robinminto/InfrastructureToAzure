@@ -1,0 +1,50 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      
+    },
+  "variables": {
+    "artifactStorageName": "[concat('artifacts', uniqueString(resourceGroup().id))]",
+    "artifactStorageType": "Standard_LRS",
+    "automationAccountSku": "Free"
+  },
+  "resources": [
+
+    {
+      "type": "Microsoft.Automation/automationAccounts",
+      "name": "[concat('Automation',resourceGroup().Name)]",
+      "apiVersion": "2015-10-31",
+      "location": "West Europe",
+      "properties": {
+        "sku": {
+
+          "name": "[variables('automationAccountSku')]"
+        }
+      },
+      "resources": [ ],
+      "dependsOn": [ ]
+    },
+    
+
+    {
+      "name": "[variables('artifactStorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "artifactstorage"
+      },
+      "properties": {
+        "accountType": "[variables('artifactStorageType')]"
+      }
+    }
+  ],
+  "outputs": {
+    "artifactStorageName": {
+      "type": "string",
+      "value": "[variables('artifactStorageName')]"
+    }
+  }
+}

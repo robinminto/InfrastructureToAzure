@@ -10,10 +10,7 @@
     "AdminPassword": {
       "type": "securestring"
     },
-    "DeploymentID": {
-
-      "type": "string"
-    },
+    
     "AutomationRegistrationURL": {
       "type": "string"
 
@@ -23,11 +20,12 @@
       "type": "string"
 
     },
-    "ArtifactsSASToken": {
+ 
+  "MOFUri": {
 
       "type": "string"
-    },
-      "timestamp": {
+  },
+    "timestamp": {
       "type": "string",
       "metadata": {
         "description": "The current datetime, as a string, to force the request to go through ARM even if all fields are the same as last ARM deployment of this template; example in parameters file is in MM/dd/yyyy H:mm:ss tt format"
@@ -35,14 +33,7 @@
     }
   },
   "variables": {
-    "configurationMode": "ApplyAndAutoCorrect",
-    "configurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
-    "configurationModeFrequencyMins": 15,
-    "refreshFrequencyMins": 30,
-    "rebootNodeIfNeeded": true,
-    "actionAfterReboot": "ContinueConfiguration",
-    "allowModuleOverwrite": false,
-    "st1Name": "[toLower(concat('stor',parameters('deploymentid')))]",
+     "st1Name": "[uniqueString(resourceGroup().id)]",
     "linuxvm1Name": "linuxvm1",
     "winvm1Name": "winvm1",
     "winvm1WindowsOSVersion": "2012-R2-Datacenter",
@@ -50,15 +41,12 @@
     "vn1Prefix": "10.0.0.0/16",
     "vn1Subnet1Name": "Subnet-1",
     "vn1Subnet1Prefix": "10.0.0.0/24",
-    "vn1Subnet2Name": "Subnet-2",
-    "vn1Subnet2Prefix": "10.0.1.0/24",
     "linuxvm1ImagePublisher": "Canonical",
     "linuxvm1ImageOffer": "UbuntuServer",
-    "linuxvm1UbuntuOSVersion": "15.10",
+    "linuxvm1UbuntuOSVersion": "16.04.0-LTS",
     "linuxvm1OSDiskName": "linuxvm1OSDisk",
     "linuxvm1VmSize": "Standard_D1",
     "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'vn1')]",
-    "SubnetRef": "[concat(variables('VnetID'), '/subnets/', variables('vn1Subnet1Name'))]",
     "StorageAccountContainerName": "vhds",
     "linuxvm1NicName": "[concat(variables('linuxvm1Name'), 'NetworkInterface')]",
     "winvm1ImagePublisher": "MicrosoftWindowsServer",
@@ -66,12 +54,80 @@
     "winvm1OSDiskName": "winvm1OSDisk",
     "winvm1VmSize": "Standard_D1",
     "winvm1NicName": "[concat(variables('winvm1Name'), 'NetworkInterface')]",
-    "publicIPAddressName": "[toLower(concat('dotd',  parameters('deploymentid')))]",
+    "publicIPAddressName": "[concat('infra2azure',uniqueString(resourceGroup().id))]",
     "winvmConfigurationFunction": "winvmConfiguration.ps1\\Main",
     "linuxvmConfigurationFunction": "linuxvmConfiguration.ps1\\Main",
-    "testConfigurationFunction": "testConfiguration.ps1\\Main"
+    "nsgName":  "SubnetNSG"
   },
   "resources": [
+
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NetworkSecurityGroup"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1000,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "WinRM",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "5986",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1010,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "SSH",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1030,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1020,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "resources": [ ],
+      "dependsOn": [ ]
+    },
     {
       "name": "[variables('st1Name')]",
       "type": "Microsoft.Storage/storageAccounts",
@@ -113,8 +169,8 @@
         ],
         "loadBalancingRules": [
           {
-            
-              "name": "RDP",
+
+            "name": "RDP",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/frontendIPConfigurations/LoadBalancerFrontend')]"
@@ -124,7 +180,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'lb1'), '/backendAddressPools/LoadBalancerBackend')]"
 
               },
-               "protocol": "Tcp",
+              "protocol": "Tcp",
               "frontendPort": 3389,
               "backendPort": 3389,
               "enableFloatingIP": false,
@@ -132,48 +188,48 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'),'/probes/rdpProbe')]"
               }
             }
-            },
-            {
-              "name": "SSH",
-              "properties": {
-                "frontendIPConfiguration": {
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/frontendIPConfigurations/LoadBalancerFrontend')]"
-                },
-                "backendAddressPool": {
+          },
+          {
+            "name": "SSH",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/frontendIPConfigurations/LoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
 
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'lb1'), '/backendAddressPools/LoadBalancerBackend')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'lb1'), '/backendAddressPools/LoadBalancerBackend')]"
 
-                },
-                "protocol": "Tcp",
-                "frontendPort": 22,
-                "backendPort": 22,
-                "enableFloatingIP": false,
-                "probe": {
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'),'/probes/sshProbe')]"
-                }
-              }
-            },
-            {
-              "name": "HTTP",
-              "properties": {
-                "frontendIPConfiguration": {
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/frontendIPConfigurations/LoadBalancerFrontend')]"
-                },
-                "backendAddressPool": {
-
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'lb1'), '/backendAddressPools/LoadBalancerBackend')]"
-
-                },
-                "protocol": "Tcp",
-                "frontendPort": 80,
-                "backendPort": 80,
-                "enableFloatingIP": false,
-                "probe": {
-                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'),'/probes/httpProbe')]"
-                }
+              },
+              "protocol": "Tcp",
+              "frontendPort": 22,
+              "backendPort": 22,
+              "enableFloatingIP": false,
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'),'/probes/sshProbe')]"
               }
             }
-          
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/frontendIPConfigurations/LoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
+
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'lb1'), '/backendAddressPools/LoadBalancerBackend')]"
+
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": false,
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'),'/probes/httpProbe')]"
+              }
+            }
+          }
+
         ],
         "probes": [
           {
@@ -185,25 +241,25 @@
               "numberOfProbes": 2
             }
           },
-            {
-              "name": "rdpProbe",
-              "properties": {
-                "protocol": "Tcp",
-                "port": 3389,
-                "intervalInSeconds": 5,
-                "numberOfProbes": 2
-              }
-            },
-            {
-              "name": "sshProbe",
-              "properties": {
-                "protocol": "Tcp",
-                "port": 22,
-                "intervalInSeconds": 5,
-                "numberOfProbes": 2
-              }
+          {
+            "name": "rdpProbe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 3389,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
             }
-          
+          },
+          {
+            "name": "sshProbe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 22,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          }
+
         ]
       }
     },
@@ -213,7 +269,9 @@
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
-      "dependsOn": [ ],
+      "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
+      ],
       "tags": {
         "displayName": "vn1"
       },
@@ -227,15 +285,14 @@
           {
             "name": "[variables('vn1Subnet1Name')]",
             "properties": {
-              "addressPrefix": "[variables('vn1Subnet1Prefix')]"
-            }
-          },
-          {
-            "name": "[variables('vn1Subnet2Name')]",
-            "properties": {
-              "addressPrefix": "[variables('vn1Subnet2Prefix')]"
+              "addressPrefix": "[variables('vn1Subnet1Prefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              }
+
             }
           }
+           
         ]
       }
     },
@@ -258,7 +315,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('SubnetRef')]"
+                "id": "[concat(variables('VnetID'), '/subnets/', variables('vn1Subnet1Name'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -293,7 +350,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('SubnetRef')]"
+                "id": "[concat(variables('VnetID'), '/subnets/', variables('vn1Subnet1Name'))]"
               },
               "loadBalancerBackendAddressPools": [
                 {
@@ -375,31 +432,36 @@
 
             "publisher": "Microsoft.Powershell",
             "type": "DSC",
-            "typeHandlerVersion": "2.19",
+            "typeHandlerVersion": "2.20",
             "autoUpgradeMinorVersion": true,
-            "protectedSettings": {
-              "Items": {
-                "registrationKeyPrivate": "[parameters('AutomationRegistrationKey')]"
-              }
-            },
 
             "settings": {
               "wmfVersion": "latest",
-              "configurationFunction": "UpdateLCMforAAPull.ps1\\ConfigureLCMforAAPull",
-              "Modulesurl": "[concat('https://arti',toLower(parameters('deploymentid')),'.blob.core.windows.net/artifacts/UpdateLCMforAAPull.zip')]",
-              "SasToken": "[parameters('ArtifactsSASToken')]",
+              "configuration": {
+                "function": "RegistrationMetaConfigV2",
+                "script": "RegistrationMetaConfigV2.ps1",
+                "url": "https://github.com/marrobi/InfrastructureToAzure/raw/Dev/DSC/RegistrationMetaConfigV2.zip"
+              },
               "advancedOptions": {
                 "forcePullAndApply": true
               },
-              "properties": {
-                "NodeConfigurationName": "[ concat('WinVMConfiguration','.localhost')]",
+              "configurationArguments": {
+
+              },
+
+
+          
+              "Timestamp": "[parameters('timestamp')]"
+            },
+            "protectedSettings": {
+              "configurationArguments": {
+                "NodeConfigurationName": "WinVMConfiguration.localhost",
                 "RegistrationKey": {
                   "UserName": "PLACEHOLDER_DONOTUSE",
-                  "Password": "PrivateSettingsRef:registrationKeyPrivate"
+                  "Password": "[parameters('AutomationRegistrationKey')]"
                 },
-             
-                "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
-                "Timestamp": "[parameters('timestamp')]"
+                "RegistrationUrl": "[parameters('AutomationRegistrationURL')]"
+
               }
             }
           }
@@ -461,7 +523,7 @@
         }
       },
       "resources": [
-       
+
         {
           "type": "extensions",
           "name": "LinuxVMConfiguration",
@@ -475,19 +537,17 @@
             "publisher": "Microsoft.OSTCExtensions",
             "type": "DSCForLinux",
             "typeHandlerVersion": "2.0",
-            "protectedSettings": {
-              "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
-              "RegistrationKey": "[parameters('AutomationRegistrationKey')]"
-            },
-
             "settings": {
-              "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",
-              "Mode": "Register",
+              "FileUri": "[parameters('MOFUri')]",
+              "Mode": "Pull",
                "Timestamp": "[parameters('timestamp')]"
-             }
+            }
           }
+
+
+
         }
-    
+
       ]
     },
     {

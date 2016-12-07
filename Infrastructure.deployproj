@@ -25,6 +25,8 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
+    <None Include="Demo Steps.ps1" />
+    <None Include="Deploy-AzureResourceGroup.ps1" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>
@@ -40,8 +42,10 @@
     </Content>
     <None Include="DSC\LinuxVMConfiguration.ps1" />
     <None Include="DSC\Modules\nx.zip" />
+    <None Include="DSC\RegistrationMetaConfigV2.zip" />
     <None Include="Scripts\PreTemplateSteps.ps1" />
     <None Include="Scripts\PostTemplateSteps.ps1" />
+    <None Include="Templates\automation.json" />
     <None Include="Templates\empty.json" />
     <None Include="Templates\simplevm.json" />
     <None Include="Websites\LinuxWebsite.zip" />

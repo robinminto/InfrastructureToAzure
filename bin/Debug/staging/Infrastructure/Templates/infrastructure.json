@@ -1,0 +1,590 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+
+    "AdminUsername": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AdminPassword": {
+      "type": "securestring"
+    },
+    
+    "AutomationRegistrationURL": {
+      "type": "string"
+
+    },
+    "AutomationRegistrationKey": {
+
+      "type": "string"
+
+    },
+ 
+  "MOFUri": {
+
+      "type": "string"
+  },
+    "timestamp": {
+      "type": "string",
+      "metadata": {
+        "description": "The current datetime, as a string, to force the request to go through ARM even if all fields are the same as last ARM deployment of this template; example in parameters file is in MM/dd/yyyy H:mm:ss tt format"
+      }
+    }
+  },
+  "variables": {
+     "st1Name": "[uniqueString(resourceGroup().id)]",
+    "linuxvm1Name": "linuxvm1",
+    "winvm1Name": "winvm1",
+    "winvm1WindowsOSVersion": "2012-R2-Datacenter",
+    "st1Type": "Standard_LRS",
+    "vn1Prefix": "10.0.0.0/16",
+    "vn1Subnet1Name": "Subnet-1",
+    "vn1Subnet1Prefix": "10.0.0.0/24",
+    "linuxvm1ImagePublisher": "Canonical",
+    "linuxvm1ImageOffer": "UbuntuServer",
+    "linuxvm1UbuntuOSVersion": "16.04.0-LTS",
+    "linuxvm1OSDiskName": "linuxvm1OSDisk",
+    "linuxvm1VmSize": "Standard_D1",
+    "VnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'vn1')]",
+    "StorageAccountContainerName": "vhds",
+    "linuxvm1NicName": "[concat(variables('linuxvm1Name'), 'NetworkInterface')]",
+    "winvm1ImagePublisher": "MicrosoftWindowsServer",
+    "winvm1ImageOffer": "WindowsServer",
+    "winvm1OSDiskName": "winvm1OSDisk",
+    "winvm1VmSize": "Standard_D1",
+    "winvm1NicName": "[concat(variables('winvm1Name'), 'NetworkInterface')]",
+    "publicIPAddressName": "[concat('infra2azure',uniqueString(resourceGroup().id))]",
+    "winvmConfigurationFunction": "winvmConfiguration.ps1\\Main",
+    "linuxvmConfigurationFunction": "linuxvmConfiguration.ps1\\Main",
+    "nsgName":  "SubnetNSG"
+  },
+  "resources": [
+
+    {
+      "apiVersion": "2016-03-30",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('nsgName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NetworkSecurityGroup"
+      },
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "3389",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1000,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "WinRM",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "5986",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1010,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "SSH",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1030,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 1020,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "resources": [ ],
+      "dependsOn": [ ]
+    },
+    {
+      "name": "[variables('st1Name')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "st1"
+      },
+      "properties": {
+        "accountType": "[variables('st1Type')]"
+      }
+    },
+
+    {
+      "apiVersion": "2015-06-15",
+      "name": "lb1",
+      "type": "Microsoft.Network/loadBalancers",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]"
+      ],
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "LoadBalancerFrontend",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "LoadBalancerBackend"
+          }
+
+        ],
+        "loadBalancingRules": [
+          {
+
+            "name": "RDP",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/frontendIPConfigurations/LoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
+
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'lb1'), '/backendAddressPools/LoadBalancerBackend')]"
+
+              },
+              "protocol": "Tcp",
+              "frontendPort": 3389,
+              "backendPort": 3389,
+              "enableFloatingIP": false,
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'),'/probes/rdpProbe')]"
+              }
+            }
+          },
+          {
+            "name": "SSH",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/frontendIPConfigurations/LoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
+
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'lb1'), '/backendAddressPools/LoadBalancerBackend')]"
+
+              },
+              "protocol": "Tcp",
+              "frontendPort": 22,
+              "backendPort": 22,
+              "enableFloatingIP": false,
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'),'/probes/sshProbe')]"
+              }
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/frontendIPConfigurations/LoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
+
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', 'lb1'), '/backendAddressPools/LoadBalancerBackend')]"
+
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": false,
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'),'/probes/httpProbe')]"
+              }
+            }
+          }
+
+        ],
+        "probes": [
+          {
+            "name": "httpProbe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 80,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          },
+          {
+            "name": "rdpProbe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 3389,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          },
+          {
+            "name": "sshProbe",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 22,
+              "intervalInSeconds": 5,
+              "numberOfProbes": 2
+            }
+          }
+
+        ]
+      }
+    },
+
+    {
+      "name": "vn1",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
+      ],
+      "tags": {
+        "displayName": "vn1"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('vn1Prefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('vn1Subnet1Name')]",
+            "properties": {
+              "addressPrefix": "[variables('vn1Subnet1Prefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              }
+
+            }
+          }
+           
+        ]
+      }
+    },
+    {
+      "name": "[variables('linuxvm1NicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', 'vn1')]",
+        "[concat('Microsoft.Network/loadBalancers/','lb1')]"
+      ],
+      "tags": {
+        "displayName": "linuxvm1Nic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[concat(variables('VnetID'), '/subnets/', variables('vn1Subnet1Name'))]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/backendAddressPools/LoadBalancerBackend')]"
+
+                }
+              ]
+            }
+          }
+
+        ]
+
+      }
+    },
+
+    {
+      "name": "[variables('winvm1NicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', 'vn1')]",
+        "[concat('Microsoft.Network/loadBalancers/', 'lb1')]"
+      ],
+      "tags": {
+        "displayName": "winvm1Nic"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[concat(variables('VnetID'), '/subnets/', variables('vn1Subnet1Name'))]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(resourceId('Microsoft.Network/loadBalancers','lb1'), '/backendAddressPools/LoadBalancerBackend')]"
+                }
+              ]
+
+
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('winvm1Name')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('st1Name'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('winvm1NicName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/','VMs')]"
+
+      ],
+      "tags": {
+        "displayName": "winvm1"
+      },
+      "properties": {
+        "availabilitySet": {
+
+          "id": "[resourceId('Microsoft.Compute/availabilitySets','VMs')]"
+
+        },
+
+        "hardwareProfile": {
+          "vmSize": "[variables('winvm1VmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('winvm1Name')]",
+          "adminUsername": "[parameters('adminusername')]",
+          "adminPassword": "[parameters('adminpassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('winvm1ImagePublisher')]",
+            "offer": "[variables('winvm1ImageOffer')]",
+            "sku": "[variables('winvm1WindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "winvm1OSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('st1Name'), '.blob.core.windows.net/', variables('StorageAccountContainerName'), '/', variables('winvm1OSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('winvm1NicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "type": "extensions",
+          "name": "WindowsVMConfiguration",
+          "apiVersion": "2015-06-15",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/',variables('winvm1Name'))]"
+
+
+          ],
+          "properties": {
+
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.20",
+            "autoUpgradeMinorVersion": true,
+
+            "settings": {
+              "wmfVersion": "latest",
+              "configuration": {
+                "function": "RegistrationMetaConfigV2",
+                "script": "RegistrationMetaConfigV2.ps1",
+                "url": "https://github.com/marrobi/InfrastructureToAzure/raw/Dev/DSC/RegistrationMetaConfigV2.zip"
+              },
+              "advancedOptions": {
+                "forcePullAndApply": true
+              },
+              "configurationArguments": {
+
+              },
+
+
+          
+              "Timestamp": "[parameters('timestamp')]"
+            },
+            "protectedSettings": {
+              "configurationArguments": {
+                "NodeConfigurationName": "WinVMConfiguration.localhost",
+                "RegistrationKey": {
+                  "UserName": "PLACEHOLDER_DONOTUSE",
+                  "Password": "[parameters('AutomationRegistrationKey')]"
+                },
+                "RegistrationUrl": "[parameters('AutomationRegistrationURL')]"
+
+              }
+            }
+          }
+        }
+      ]
+    },
+
+
+    {
+      "name": "[variables('linuxvm1Name')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('st1Name'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('linuxvm1NicName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/','VMs')]"
+
+      ],
+      "tags": {
+        "displayName": "linuxvm1"
+      },
+      "properties": {
+        "availabilitySet": {
+
+          "id": "[resourceId('Microsoft.Compute/availabilitySets','VMs')]"
+
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('linuxvm1VmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('linuxvm1Name')]",
+          "adminUsername": "[parameters('adminusername')]",
+          "adminPassword": "[parameters('adminpassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('linuxvm1ImagePublisher')]",
+            "offer": "[variables('linuxvm1ImageOffer')]",
+            "sku": "[variables('linuxvm1UbuntuOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "linuxvm1OSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('st1Name'), '.blob.core.windows.net/', variables('StorageAccountContainerName'), '/', variables('linuxvm1OSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('linuxvm1NicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+
+        {
+          "type": "extensions",
+          "name": "LinuxVMConfiguration",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('linuxvm1Name'))]"
+
+          ],
+          "location": "[resourceGroup().location]",
+          "properties": {
+            "publisher": "Microsoft.OSTCExtensions",
+            "type": "DSCForLinux",
+            "typeHandlerVersion": "2.0",
+      
+       /*     "protectedSettings": {
+              "RegistrationUrl": "[parameters('AutomationRegistrationURL')]",
+              "RegistrationKey": "[parameters('AutomationRegistrationKey')]"
+            },
+            */
+            "settings": {
+        /*      "NodeConfigurationName": "[ concat('LinuxVMConfiguration','.localhost')]",*/
+              "Mode": "Pull",
+         "FileUri": "[parameters('MOFUri')]",
+              "Timestamp": "[parameters('timestamp')]"
+            }
+          }
+
+
+
+        }
+
+      ]
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('publicIPAddressName')]"
+        }
+      }
+    },
+    {
+      "name": "VMs",
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "VMs"
+      },
+      "properties": {
+
+      }
+    }
+  ],
+  "outputs": {
+    
+    
+  }
+}

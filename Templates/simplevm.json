@@ -28,6 +28,10 @@
             "type": "string",
             "defaultValue": "2012-R2-Datacenter"
            
+        },
+        "PIPDnsName": {
+            "type": "string",
+            "minLength": 1
         }
     },
     "variables": {
@@ -44,7 +48,8 @@
         "VMVnetID": "[resourceId('Microsoft.Network/virtualNetworks', 'Network')]",
         "VMSubnetRef": "[concat(variables('VMVnetID'), '/subnets/', variables('NetworkSubnet1Name'))]",
         "VMStorageAccountContainerName": "vhds",
-        "VMNicName": "[concat(parameters('VMName'), 'NetworkInterface')]"
+        "VMNicName": "[concat(parameters('VMName'), 'NetworkInterface')]",
+        "PIPName": "PIP"
     },
     "resources": [
         {
@@ -97,7 +102,8 @@
             "location": "[resourceGroup().location]",
             "apiVersion": "2015-06-15",
             "dependsOn": [
-                "[concat('Microsoft.Network/virtualNetworks/', 'Network')]"
+                "[concat('Microsoft.Network/virtualNetworks/', 'Network')]",
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('PIPName'))]"
             ],
             "tags": {
                 "displayName": "VMNic"
@@ -110,6 +116,9 @@
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
                                 "id": "[variables('VMSubnetRef')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('PIPName'))]"
                             }
                         }
                     }
@@ -159,6 +168,22 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('VMNicName'))]"
                         }
                     ]
+                }
+            }
+        },
+        {
+            "name": "[variables('PIPName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [ ],
+            "tags": {
+                "displayName": "PIP"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic",
+                "dnsSettings": {
+                    "domainNameLabel": "[parameters('PIPDnsName')]"
                 }
             }
         }
