@@ -15,13 +15,13 @@ Start-AzureRMVM -Name VSTSBuild -ResourceGroupName "DevOps-Demos"
 Get-AzureRmResourceGroup | Where { $_.ResourceGroupName -match "DevOpsDemo-Infra2Azure*" }  | Get-AzureRmVM | Start-AzureRMVM 
 
 # Retrieve List of Images
-#(Get-AzureRmVMImagePublisher -Location "East US" | Get-AzureRmVMImageOffer | Get-AzureRmVMImageSku).Count # 10/3: 1008
+#(Get-AzureRmVMImagePublisher -Location "East US" | Get-AzureRmVMImageOffer | Get-AzureRmVMImageSku).Count # 10/3: 1008 07/12: 1793
 # Get-AzureRmVMImagePublisher -Location "West Europe" | Get-AzureRmVMImageOffer | Get-AzureRmVMImageSku | ogv 
 Start-Process powershell.exe  -Argument '-command "Login-AzureRmAccount -ServicePrincipal -Tenant  """72f988bf-86f1-41af-91ab-2d7cd011db47""" -Credential (Get-Credential -Message """Password""" -UserName """74824f88-020e-446b-ba3e-35f75f376987"""); Get-AzureRmVMImagePublisher -Location """West Europe""" | Get-AzureRmVMImageOffer | Get-AzureRmVMImageSku | ogv ; read-host "press enter"' 
 
 
 # open inPrivate Session and check LB
-Start-Process "http://infra2azurewazwv7terl2w4.westeurope.cloudapp.azure.com.westeurope.cloudapp.azure.com/"
+Start-Process "http://infra2azurewazwv7terl2w4.westeurope.cloudapp.azure.com/"
 
 #  Open  VS
 Start-Process "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv" -ArgumentList  "$($solutionPath)Infrastructure.sln"
@@ -65,7 +65,7 @@ Start-Process "https://portal.azure.com/?feature.customportal=false#create/Micro
 # GitHub & visualise
 Start-Process "https://github.com/Azure/azure-quickstart-templates"
 
-Start-Process "http://armviz.io"
+Start-Process "http://armviz.io" # simple vm
 
 # Start deployment
 $depInfra = New-AzureRmResourceGroupDeployment `
@@ -101,7 +101,7 @@ Start-Process "https://portal.azure.com/?feature.customportal=false#create/Micro
 #  Open  Template in VS
 Start-Process "C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv" -ArgumentList  "$($solutionPath)Templates\infrastructure.json"
 
-Start-Process "http://armviz.io"
+Start-Process "http://armviz.io" # inrastructure.json
 
 
 # DO NOT RUN, already done.
@@ -141,8 +141,12 @@ $depInfra = New-AzureRmResourceGroupDeployment `
  # Link linux config
 .\Scripts\PostTemplateSteps.ps1 -ResourceGroupName $ResourceGroupName -SolutionPath $solutionPath -Region $Region 
 
+# show automation account in portal
+Start-Process "https://portal.azure.com/?feature.customportal=false"
 
-# open: create in in private session
+
+
+# demonstrate result: create in in private session
 Start-Process "http://xxx.westeurope.cloudapp.azure.com/"
 
 
